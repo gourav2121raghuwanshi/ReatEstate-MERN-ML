@@ -3,16 +3,19 @@ const mongoose = require('mongoose')
 require('dotenv').config();
 const app = express();
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 
-// Enable CORS for all routes
-app.use(cors());
+
+
+
 
 const userroute = require('./routes/user.route.js')
 const authRouter = require('./routes/authRoute.js');
+
 // middlewares
-
 app.use(express.json())
-
+app.use(cookieParser());
+app.use(cors());
 
 // database connection
 mongoose.connect(process.env.DBURL)
