@@ -2,6 +2,11 @@ const express = require('express')
 const mongoose = require('mongoose')
 require('dotenv').config();
 const app = express();
+const cors = require('cors');
+
+// Enable CORS for all routes
+app.use(cors());
+
 const userroute = require('./routes/user.route.js')
 const authRouter = require('./routes/authRoute.js');
 // middlewares
