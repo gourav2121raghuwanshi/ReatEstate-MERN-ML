@@ -7,8 +7,8 @@ const Header = () => {
       <div className='flex justify-between items-center max-w-7xl  mx-auto p-3'>
         <Link to='/'>
           <h1 className='font-bold hover:cursor-pointer text-sm sm:text-xl flex flex-wrap '>
-            <span className='text-slate-500 font-bold md:text-lg lg:text-2xl'>FindYour</span>
-            <span className='text-slate-700 font-bold md:text-lg lg:text-2xl'>Home</span>
+            <span className='text-slate-500 font-bold md:text-2xl lg:text-4xl'>FindYour</span>
+            <span className='text-slate-700 font-bold md:text-2xl lg:text-4xl'>Home</span>
           </h1>
         </Link>
         <form className='bg-slate-100  flex items-center justify-between p-3 rounded-lg '>
