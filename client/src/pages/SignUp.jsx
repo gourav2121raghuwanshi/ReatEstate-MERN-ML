@@ -35,7 +35,7 @@ const SignUp = () => {
         },
       });
   
-      const data = await res.data; // Assuming your server returns a JSON object directly
+      const data = await res.data; 
   
       if (data.success === false) {
         setLoading(false);
@@ -49,7 +49,7 @@ const SignUp = () => {
       // console.log(data);
     } catch (error) {
       setLoading(false);
-      setError(error.message); // Set an appropriate error message
+      setError(error.message); 
       console.error('Error:', error.message);
     }
   };
@@ -81,6 +81,7 @@ const SignUp = () => {
           </span>
         </Link>
       </div>
+      {error && <p className='text-red-500 mt-5 font-semibold text-xl'>{error}</p>}
     </div>
   )
 }

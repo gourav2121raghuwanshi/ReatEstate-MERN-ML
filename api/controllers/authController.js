@@ -10,6 +10,7 @@ exports.signup = async (req, res, next) => {
         const { username, email, password } = req.body;
 
         const hashedPassword = await bcrypt.hash(password, 10);
+       
         const user = await User.create({ username, email, password: hashedPassword });
 
         res.status(201).json({
@@ -31,7 +32,7 @@ exports.signin = async (req, res, next) => {
         const validUser = await User.findOne({ email });
 
         if (!validUser) {
-            return next(errorHandler(404, "User Not Found"));
+            return next(errorHandler(404, "User Not Found!"));
         }
 
         const hashedPassword = validUser.password;
