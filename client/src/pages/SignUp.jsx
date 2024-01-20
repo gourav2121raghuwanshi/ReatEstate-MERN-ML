@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom';
-import ClipLoader from "react-spinners/ClipLoader";
- 
+// import ClipLoader from "react-spinners/ClipLoader";
+import OAuth from '../components/OAuth';
 const SignUp = () => {
 
   const [formdata, setformdata] = useState({});
@@ -72,6 +72,7 @@ const SignUp = () => {
         <button disabled={loading} className='bg-slate-700 text-white p-3 sm:text-xl py-3  rounded-lg uppercase hover:opacity-95 disabled:opacity-80 transition-all  duration-200' >
           {loading ? 'Loading...' : 'Sign up'}
         </button>
+        <OAuth/>
       </form>
       <div className='flex gap-3 mt-5 sm:text-xl font-semibold'>
         <p>Have an account? </p>

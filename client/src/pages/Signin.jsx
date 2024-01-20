@@ -1,21 +1,22 @@
 import React from 'react'
-import { Link,useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import axios from 'axios';
 // import ClipLoader from "react-spinners/ClipLoader";
 import { useDispatch, useSelector } from 'react-redux';
 import { signInStart, signInSuccess, signInFailure } from "../redux/user/userSlice"
-const Signin = () => {
+import OAuth from '../components/OAuth';
 
+const Signin = () => {
   const [formdata, setformdata] = useState({});
   const { loading, error } = useSelector((state) => state.user)
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const handleChange = (e) => {
     setformdata({
-        ...formdata,
-        [e.target.id]: e.target.value,
-      });
+      ...formdata,
+      [e.target.id]: e.target.value,
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -54,9 +55,10 @@ const Signin = () => {
         </input>
         <input type="password" placeholder='password' value={formdata.password} className='sm:text-xl font-semibold border p-3 rounded-lg ' id='password' onChange={handleChange} >
         </input>
-        <button disabled={loading} className='bg-slate-700 text-white p-3 sm:text-xl py-3  rounded-lg uppercase hover:opacity-95 disabled:opacity-80 transition-all  duration-200' >
+        <button disabled={loading} className='bg-slate-700 text-white p-3  py-3  rounded-lg uppercase sm:text-xl hover:opacity-95 disabled:opacity-80 transition-all  duration-200' >
           {loading ? 'Loading...' : 'Sign in'}
         </button>
+        <OAuth/>
       </form>
       <div className='flex gap-3 mt-5 sm:text-xl font-semibold'>
         <p>Dont have an account? </p>
