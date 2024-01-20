@@ -3,14 +3,15 @@ import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom';
-import ClipLoader from "react-spinners/ClipLoader";
- 
+// import ClipLoader from "react-spinners/ClipLoader";
+import { useDispatch, useSelector } from 'react-redux';
+import { signInStart, signInSuccess, signInFailure } from "../redux/user/userSlice.js"
 const Signin = () => {
 
   const [formdata, setformdata] = useState({});
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const { loading, error } = useSelector((state) => state.user)
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const handleChange = (e) => {
     setformdata(
       {
@@ -19,61 +20,59 @@ const Signin = () => {
       }
     )
   }
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-  
+
+
     try {
+      dispatch(signInStart());
       const res = await axios.post('/api/auth/signin', formdata, {
         headers: {
           'Content-Type': 'application/json',
         },
       });
-      const data = await res.data; 
-      
+      const data = await res.data;
+
       if (data.success === false) {
-        setLoading(false);
-        setError(data.message);
+        dispatch(signInFailure(data.message));
         return;
       }
-  
-      setLoading(false);
-      setError(null)
+
+      dispatch(signInSuccess(data));
       navigate('/')
-      
+
     } catch (error) {
-      setLoading(false);
-      setError(error.message); 
+      dispatch(signInFailure());
       console.error('Error:', error.message);
     }
   };
-  
+
   return (
     <div className='p-5 max-w-2xl mx-auto'>
-     <h1 className='text-2xl sm:text-4xl text-slate-700 text-center font-semibold my-7 '>
-     Sign In
+      <h1 className='text-2xl sm:text-4xl text-slate-700 text-center font-semibold my-7 '>
+        Sign In
       </h1>
       <form onSubmit={handleSubmit} className='flex flex-col gap-4 '>
-      
+
         <input type="text" placeholder='email' value={formdata.email} className='sm:text-xl font-semibold border p-3 rounded-lg ' id='email' onChange={handleChange} >
         </input>
-        <input type="text" placeholder='password' value={formdata.password} className='sm:text-xl font-semibold border p-3 rounded-lg ' id='password' onChange={handleChange} >
+        <input type="password" placeholder='password' value={formdata.password} className='sm:text-xl font-semibold border p-3 rounded-lg ' id='password' onChange={handleChange} >
         </input>
         <button disabled={loading} className='bg-slate-700 text-white p-3 sm:text-xl py-3  rounded-lg uppercase hover:opacity-95 disabled:opacity-80 transition-all  duration-200' >
           {loading ? 'Loading...' : 'Sign in'}
         </button>
       </form>
-       <div className='flex gap-3 mt-5 sm:text-xl font-semibold'>
+      <div className='flex gap-3 mt-5 sm:text-xl font-semibold'>
         <p>Dont have an account? </p>
         <Link to={'/sign-in'}>
           <span className='text-blue-700 ' >
-            Sign Up 
+            Sign Up
           </span>
         </Link>
-      </div> 
+      </div>
       {error && <p className='text-red-500 mt-5 font-semibold text-xl '>{error}</p>}
-   
+
     </div>
   )
 }
