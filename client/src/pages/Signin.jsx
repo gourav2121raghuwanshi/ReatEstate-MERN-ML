@@ -1,11 +1,10 @@
 import React from 'react'
-import { Link } from 'react-router-dom';
+import { Link,useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import axios from 'axios'
-import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 // import ClipLoader from "react-spinners/ClipLoader";
 import { useDispatch, useSelector } from 'react-redux';
-import { signInStart, signInSuccess, signInFailure } from "../redux/user/userSlice.js"
+import { signInStart, signInSuccess, signInFailure } from "../redux/user/userSlice"
 const Signin = () => {
 
   const [formdata, setformdata] = useState({});
@@ -13,18 +12,14 @@ const Signin = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const handleChange = (e) => {
-    setformdata(
-      {
+    setformdata({
         ...formdata,
-        [e.target.id]: e.target.value
-      }
-    )
-  }
+        [e.target.id]: e.target.value,
+      });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-
     try {
       dispatch(signInStart());
       const res = await axios.post('/api/auth/signin', formdata, {
