@@ -2,7 +2,7 @@ import React from 'react'
 import { Link } from 'react-router-dom';
 import { FaSearch } from "react-icons/fa";
 import {  useSelector } from 'react-redux';
-
+import { TypeAnimation } from 'react-type-animation';
 const Header = () => {
   const { currentUser } = useSelector(state => state.user);
 
@@ -11,6 +11,22 @@ const Header = () => {
       <div className='flex justify-between items-center max-w-7xl  mx-auto p-3'>
         <Link to='/'>
           <h1 className='font-bold hover:cursor-pointer text-sm sm:text-xl flex flex-wrap '>
+
+          {/* <TypeAnimation
+                            sequence={["FindYourHome",2000,""]}
+                            repeat={Infinity}
+                            cursor={true}
+                            omitDeletionAnimation={true}  //the written down text will not be deleted
+                            style={
+                                {
+                                    whiteSpace:"pre-line", //on this parameter we will shift to new line
+                                    display:"block",   //to shift to new line
+                                }
+                            }
+                    /> */}
+
+
+
             <span className='text-slate-500 font-bold md:text-2xl lg:text-4xl'>FindYour</span>
             <span className='text-slate-700 font-bold md:text-2xl lg:text-4xl'>Home</span>
           </h1>
