@@ -9,7 +9,7 @@ const cookieParser = require('cookie-parser');
 
 
 
-const userroute = require('./routes/user.route.js')
+const userroute = require('./routes/userRoute.js')
 const authRouter = require('./routes/authRoute.js');
 
 // middlewares
