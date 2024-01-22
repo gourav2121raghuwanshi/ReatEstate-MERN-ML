@@ -7,7 +7,10 @@ import {
   updateUserFailure,
   deleteUserStart,
   deleteUserSuccess,
-  deleteUserFailure
+  deleteUserFailure,
+  signoutUserStart,
+  signoutUserSuccess,
+  signoutUserFailure
 } from "../redux/user/userSlice"
 import { useDispatch } from 'react-redux'
 // import { toast } from 'react-toastify'
@@ -107,7 +110,23 @@ export default function Profile() {
     catch (err) {
       dispatch(deleteUserFailure(err.message));
       <p className='text-red-600 font-semibold sm:text-2xl text-lg mt-7'>{error ? error.message : ""}</p>
-     
+
+    }
+  }
+
+  const handleSignOut = async () => {
+    try {
+      dispatch(signoutUserStart())
+      const res = await axios.get(`/api/auth/signout`);
+      const data = await res.data;
+      if (data.success === false) {
+        dispatch(signoutUserFailure(data.message))
+        return;
+      }
+      dispatch(signoutUserSuccess(data))
+    }
+    catch (err) {
+      dispatch(signoutUserFailure(err.message))
     }
   }
   return (
@@ -122,7 +141,7 @@ export default function Profile() {
           hidden
         />
         <img
-          src={formData.avatar || "https://res.cloudinary.com/domheydkx/image/upload/v1705905528/gourav/uyb6ntwjcrxacztiw4iv.jpg"}
+          src={formData.avatar}
           onClick={() => fileRef.current.click()}
           alt="profile image"
           className='rounded-full h-20 w-20  sm:h-40 sm:w-40 object-cover cursor-pointer mt-4 self-center'
@@ -164,7 +183,7 @@ export default function Profile() {
       </form>
       <div className='flex justify-between mt-4'>
         <span onClick={handleDeleteUser} className='text-red-500 text-lg sm:text-xl md:text-2xl font-semibold   cursor-pointer'>Delete Account</span>
-        <span className='text-red-500 text-lg sm:text-xl md:text-2xl font-semibold   cursor-pointer'>Sign Out</span>
+        <span onClick={handleSignOut} className='text-red-500 text-lg sm:text-xl md:text-2xl font-semibold   cursor-pointer'>Sign Out</span>
       </div>
 
       <p className='text-red-600 font-semibold sm:text-2xl text-lg mt-7'>{error ? error.message : ""}</p>
