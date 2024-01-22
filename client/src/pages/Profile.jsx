@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { useRef } from 'react'
-import { updateUserStart, updateUserSuccess, updateUserFailure } from "../redux/user/userSlice"
+import {
+  updateUserStart,
+  updateUserSuccess,
+  updateUserFailure,
+  deleteUserStart,
+  deleteUserSuccess,
+  deleteUserFailure
+} from "../redux/user/userSlice"
 import { useDispatch } from 'react-redux'
 // import { toast } from 'react-toastify'
 import {
@@ -84,6 +91,25 @@ export default function Profile() {
     );
   };
 
+  const handleDeleteUser = async () => {
+    try {
+      dispatch(deleteUserStart());
+      const res = await axios.delete(`/api/user/delete/${currentUser._id}`);
+      const data = await res.data;
+
+      if (data.success === false) {
+        dispatch(deleteUserFailure(data.message));
+        return;
+      }
+      dispatch(deleteUserSuccess(data));
+      navigate('/sign-up');
+    }
+    catch (err) {
+      dispatch(deleteUserFailure(err.message));
+      <p className='text-red-600 font-semibold sm:text-2xl text-lg mt-7'>{error ? error.message : ""}</p>
+     
+    }
+  }
   return (
     <div className='p-3 max-w-xl mx-auto ' >
       <h1 className='sm:text-4xl text-2xl text-gray-700 font-bold text-center my-7 '>Profile</h1>
@@ -96,7 +122,7 @@ export default function Profile() {
           hidden
         />
         <img
-          src={formData.avatar || currentUser.avatar}
+          src={formData.avatar || "https://res.cloudinary.com/domheydkx/image/upload/v1705905528/gourav/uyb6ntwjcrxacztiw4iv.jpg"}
           onClick={() => fileRef.current.click()}
           alt="profile image"
           className='rounded-full h-20 w-20  sm:h-40 sm:w-40 object-cover cursor-pointer mt-4 self-center'
@@ -137,7 +163,7 @@ export default function Profile() {
         </button>
       </form>
       <div className='flex justify-between mt-4'>
-        <span className='text-red-500 text-lg sm:text-xl md:text-2xl font-semibold   cursor-pointer'>Delete Account</span>
+        <span onClick={handleDeleteUser} className='text-red-500 text-lg sm:text-xl md:text-2xl font-semibold   cursor-pointer'>Delete Account</span>
         <span className='text-red-500 text-lg sm:text-xl md:text-2xl font-semibold   cursor-pointer'>Sign Out</span>
       </div>
 

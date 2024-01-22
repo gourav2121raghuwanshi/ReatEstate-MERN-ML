@@ -53,7 +53,7 @@ const Header = () => {
           <Link to='/profile'>
             {
               currentUser ? (
-                <img src={currentUser.avatar} className='rounded-full h-10 w-10 object-contain' alt='profile'>
+                <img src={currentUser.avatar || "https://res.cloudinary.com/domheydkx/image/upload/v1705905528/gourav/uyb6ntwjcrxacztiw4iv.jpg"} className='rounded-full h-10 w-10 object-contain' alt='profile'>
                 </img>
               ) : (
                 <li className='text-slate-700 font-semibold hover:underline hover:cursor-pointer'>
