@@ -7,6 +7,7 @@ const cookieParser = require('cookie-parser');
 
 const userroute = require('./routes/userRoute.js')
 const authRouter = require('./routes/authRoute.js');
+const listingRouter = require('./routes/listingRouter.js');
 
 // middlewares
 app.use(express.json())
@@ -26,6 +27,7 @@ app.listen(process.env.PORT, () => {
 
 app.use('/api/user', userroute);
 app.use('/api/auth', authRouter);
+app.use('/api/listing', listingRouter);
 
 
 
