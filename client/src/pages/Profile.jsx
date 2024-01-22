@@ -22,6 +22,7 @@ import {
 } from 'firebase/storage';
 import { app } from '../firebase'
 import axios from 'axios'
+import { Link } from 'react-router-dom'
 export default function Profile() {
 
   const { currentUser, loading, error } = useSelector((state) => state.user);
@@ -180,6 +181,10 @@ export default function Profile() {
         <button disabled={loading} className='bg-slate-700 text-white  sm:text-2xl text-lg font-semibold rounded-lg p-1 sm:p-5 uppercase hover:opacity-95 disabled:opacity-80'>
           {loading ? 'Loading...' : 'Update'}
         </button>
+        <Link className='bg-green-700 text-white sm:text-2xl text-lg font-semibold rounded-lg p-1 sm:p-5  uppercase text-center hover:opacity-95' 
+        to='/create-listing' >
+          create Listing
+        </Link>
       </form>
       <div className='flex justify-between mt-4'>
         <span onClick={handleDeleteUser} className='text-red-500 text-lg sm:text-xl md:text-2xl font-semibold   cursor-pointer'>Delete Account</span>
