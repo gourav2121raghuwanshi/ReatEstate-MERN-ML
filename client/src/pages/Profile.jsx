@@ -33,7 +33,8 @@ export default function Profile() {
   const [formData, setFormData] = useState({});
   const [updateSuccess, setUpdateSuccess] = useState(false);
   const dispatch = useDispatch();
-  // console.log(formData);
+  const [showListingError, setshowListingError] = useState(false);
+  const [userListings, setUserListings] = useState([]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
@@ -72,7 +73,7 @@ export default function Profile() {
   };
 
   const handleFileUpload = (file) => {
-    
+
     const storage = getStorage(app);
     const fileName = new Date().getTime() + file.name;
     const storageRef = ref(storage, fileName);
@@ -132,6 +133,23 @@ export default function Profile() {
       dispatch(signoutUserFailure(err.message))
     }
   }
+
+
+  const handleShowListings = async () => {
+    try {
+      setshowListingError(false);
+      const res = await axios.get(`/api/user/listings/${currentUser._id}`);
+      const data = await res.data;
+      if (data.success === false) {
+        setshowListingError(true);
+        return;
+      }
+      setUserListings(data);
+      // console.log(data);
+    } catch (err) {
+      showListingError(true);
+    }
+  }
   return (
     <div className='p-3 max-w-xl mx-auto ' >
       <h1 className='sm:text-4xl text-2xl text-gray-700 font-bold text-center my-7 '>Profile</h1>
@@ -144,7 +162,7 @@ export default function Profile() {
           hidden
         />
         <img
-          src={formData.avatar}
+          src={formData.avatar || currentUser.avatar}
           onClick={() => fileRef.current.click()}
           alt="profile image"
           className='rounded-full h-20 w-20  sm:h-40 sm:w-40 object-cover cursor-pointer mt-4 self-center'
@@ -183,8 +201,8 @@ export default function Profile() {
         <button disabled={loading} className='bg-slate-700 text-white  sm:text-2xl text-lg font-semibold rounded-lg p-1 sm:p-5 uppercase hover:opacity-95 disabled:opacity-80'>
           {loading ? 'Loading...' : 'Update'}
         </button>
-        <Link className='bg-green-700 text-white sm:text-2xl text-lg font-semibold rounded-lg p-1 sm:p-5  uppercase text-center hover:opacity-95' 
-        to='/create-listing' >
+        <Link className='bg-green-700 text-white sm:text-2xl text-lg font-semibold rounded-lg p-1 sm:p-5  uppercase text-center hover:opacity-95'
+          to='/create-listing' >
           create Listing
         </Link>
       </form>
@@ -193,8 +211,53 @@ export default function Profile() {
         <span onClick={handleSignOut} className='text-red-500 text-lg sm:text-xl md:text-2xl font-semibold   cursor-pointer'>Sign Out</span>
       </div>
 
-      <p className='text-red-600 font-semibold sm:text-2xl text-lg mt-7'>{error ? error.message : ""}</p>
-      <p className='text-green-600 font-semibold sm:text-2xl text-lg mt-7'>{updateSuccess ? 'User is Updated Successfully!!' : ""}</p>
+      <p className='text-red-600 font-semibold sm:text-2xl text-lg mt-7'>{error ? error.message : ""}
+      </p>
+      <p
+        className='text-green-600 font-semibold sm:text-2xl text-lg mt-7'>
+        {updateSuccess ? 'User is Updated Successfully!!' : ""}
+      </p>
+      <div className='w-full flex justify-center items-center'>
+        <button
+          onClick={handleShowListings}
+          className='text-green-900 w-fit mx-auto sm:text-2xl text-lg font-semibold rounded-lg p-1 sm:p-5 uppercase hover:opacity-95 disabled:opacity-80 '>Show Listings
+        </button>
+      </div>
+
+      <p className='text-red-700 text-xl font-semibold mt-5'>
+        {showListingError ?
+          'Error Showing Listings' : ''
+        }
+      </p>
+
+      {userListings && userListings.length > 0 &&
+        <div className='flex flex-col gap-4 sm:gap-6 md:gap-8'>
+          <h1 className='text-center mt-5 sm:mt-6 md:mt-8 text- xl sm:text-3xl md:text-5xl font-semi-bold text-gray-700'>
+            Your Listings
+          </h1>
+          {userListings.map((listing, index) => (
+            <div key={listing._id} className='flex sm:flex-row  gap-2 md:gap-4  border rounded-lg  justify-between items-center sm:p-2 md:p-4 p-1'>
+              <Link to={`/listing/${listing._id}`} >
+                <img
+                  src={listing.imageUrls[0]}
+                  alt="listing img"
+                  className='sm:h-36 sm:w-36 h-20 w-20 md:h-60 md:w-60 object-contain rounded-lg'
+                />
+              </Link>
+              <Link className='flex-1 text-slate-700 font-semibold
+               text-lg sm:text-xl md:text-2xl  hover:underline truncate' to={`/listing/${listing._id}`}  >
+                <p >
+                  {listing.name}
+                </p>
+              </Link>
+              <div className='flex flex-col gap-1 sm:gap-2 items-center md:gap-3'>
+                <button className='text-red-700 uppercase text-lg sm:text-xl md:text-2xl font-semibold'>Delete </button>
+                <button className='text-blue-700 uppercase text-lg sm:text-xl md:text-2xl font-semibold'>Edit </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      }
 
     </div>
   )

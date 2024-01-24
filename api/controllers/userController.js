@@ -1,7 +1,7 @@
 const { errorHandler } = require("../utils/error.js");
 const bcrypt = require('bcrypt');
 const User = require('../models/userModel.js');
-
+const Listing = require('../models/listingModel.js')
 exports.updateUser = async (req, res, next) => {
     try {
         console.log(req.body);
@@ -34,10 +34,25 @@ exports.deleteUser = async (req, res, next) => {
         await User.findByIdAndDelete(req.params.id);
         res.clearCookie('access_token')
         res.status(200)
-        .json('User Has been Deleted ')
-        
+            .json('User Has been Deleted ')
+
 
     } catch (err) {
         next(err);
     }
 };
+
+exports.getUserListing = async (req, res, next) => {
+    try {
+        if (req.user.id === req.params.id) {
+            const listings = await Listing.find({ userRef: req.params.id });
+            res.status(200).json(listings);
+        } else {
+            console.log("Error in viewing Listings");
+            return next(errorHandler(401, "You can view your own Listings"));
+        }
+    } catch (err) {
+        console.log(err);
+        next(err)
+    }
+}

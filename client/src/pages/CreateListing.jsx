@@ -123,9 +123,9 @@ const CreateListing = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            console.log(currentUser);
-            console.log(currentUser.username);
-            console.log(currentUser._id);
+            // console.log(currentUser);
+            // console.log(currentUser.username);
+            // console.log(currentUser._id);
             setLoading(true);
             setError(false);
             const res = await axios.post("/api/listing/create", {
@@ -161,7 +161,6 @@ const CreateListing = () => {
             <form onSubmit={handleSubmit} className='flex flex-col sm:flex-row sm:gap-8 gap-5'>
                 {/*  first side*/}
                 <div className='flex flex-col gap-4 sm:gap-6 flex-1 '>
-
                     <input
                         onChange={handleChange}
                         value={formData.name}
