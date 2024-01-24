@@ -160,7 +160,7 @@ export default function Profile() {
         return;
       }
       setUserListings((prev) => prev.filter((listing) => listing._id !== listingId));
-      
+
     } catch (err) {
       console.log(err)
     }
