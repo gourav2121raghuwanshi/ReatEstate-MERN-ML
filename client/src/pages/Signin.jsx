@@ -8,7 +8,10 @@ import { signInStart, signInSuccess, signInFailure } from "../redux/user/userSli
 import OAuth from '../components/OAuth';
 
 const Signin = () => {
-  const [formdata, setformdata] = useState({});
+  const [formdata, setformdata] = useState({
+    email: '',
+    password: '',
+  });
   const { loading, error } = useSelector((state) => state.user)
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -29,11 +32,15 @@ const Signin = () => {
         },
       });
       const data = await res.data;
+      console.log(res)
 
       if (data.success === false) {
         dispatch(signInFailure(data.message));
         return;
       }
+      console.log(data.token);
+      document.cookie = `access_token=${data.token}; path=/`;
+      
 
       dispatch(signInSuccess(data));
       navigate('/')
@@ -58,7 +65,7 @@ const Signin = () => {
         <button disabled={loading} className='bg-slate-700 text-white p-3  py-3  rounded-lg uppercase sm:text-xl hover:opacity-95 disabled:opacity-80 transition-all  duration-200' >
           {loading ? 'Loading...' : 'Sign in'}
         </button>
-        <OAuth/>
+        <OAuth />
       </form>
       <div className='flex gap-3 mt-5 sm:text-xl font-semibold'>
         <p>Dont have an account? </p>

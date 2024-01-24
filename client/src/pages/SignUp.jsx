@@ -7,7 +7,11 @@ import { useNavigate } from 'react-router-dom';
 import OAuth from '../components/OAuth';
 const SignUp = () => {
 
-  const [formdata, setformdata] = useState({});
+  const [formdata, setformdata] = useState({
+    username: '',
+    email: '',
+    password: '',
+  });
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();

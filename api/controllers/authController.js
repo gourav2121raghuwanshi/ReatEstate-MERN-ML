@@ -1,11 +1,11 @@
-// authController.js
-const User = require('../models/user.model.js')
+const User = require('../models/userModel.js')
 const bcrypt = require('bcrypt');
 require('dotenv').config();
 const { errorHandler } = require('../utils/error.js');
 const jwt = require('jsonwebtoken');
 
 exports.signup = async (req, res, next) => {
+    console.log("in");
     try {
         const { username, email, password } = req.body;
 
@@ -13,11 +13,7 @@ exports.signup = async (req, res, next) => {
 
         const user = await User.create({ username, email, password: hashedPassword });
 
-        res.status(201).json({
-            success: true,
-            data: user,
-            message: "user created successfully"
-        });
+        res.status(201).json("User Created Successfully ");
     } catch (err) {
         console.log(`error in signup ${err.message}`);
         next(err);
@@ -40,17 +36,42 @@ exports.signin = async (req, res, next) => {
             return next(errorHandler(401, "Wrong Credentials"));
         }
 
-        const token = jwt.sign({ id: validUser._id }, process.env.JWT_SECRET);
-        validUser.password = ''
-        res.
-            cookie('access_token', token, { httpOnly: true, expires: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000) }).
-            status(200).
-            json({
-                success: true,
-                message: "User logged in successfully",
-                curretUser: validUser,
+        const payload = {
+            email: validUser.email,
+            id: validUser._id
 
-            });
+        };
+        // Create a new object to avoid modifying a const variable
+        const token = jwt.sign(payload, process.env.JWT_SECRET, {
+            expiresIn: "2d",
+        });
+        console.log(token);
+        const userWithToken = { ...validUser.toObject(), token };
+
+        const { password: pass, ...rest } = userWithToken;
+
+        const options = {
+            expires: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000),
+            httpOnly: true,
+        };
+
+        // Set the cookie or use headers based on your use case
+        res.cookie("access_token", token, options).status(200).json(rest);
+
+        // validUser=validUser.toObject();
+        // validUser.token=token;
+
+        // console.log(token);
+        // const { password: pass, ...rest } = validUser._doc;
+        // const options = {
+        //     expires: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000),
+        //     httpOnly: true,
+
+        // }
+
+        // res.cookie("access_token", token, options)
+        //     .status(200).
+        //     json(rest);
     } catch (err) {
         console.error(`Error in signin: ${err.message}`);
         next(err);
@@ -84,11 +105,11 @@ exports.google = async (req, res, next) => {
     }
 }
 
-exports.signout = async (req, res,next) => {
+exports.signout = async (req, res, next) => {
     try {
         res.clearCookie('access_token');
         res.status(200).json('user has been logged out !');
-    }  
+    }
     catch (err) {
         next(err);
     }

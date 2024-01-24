@@ -99,6 +99,7 @@ export default function Profile() {
   const handleDeleteUser = async () => {
     try {
       dispatch(deleteUserStart());
+      console.log(currentUser._id);
       const res = await axios.delete(`/api/user/delete/${currentUser._id}`);
       const data = await res.data;
 

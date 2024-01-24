@@ -26,6 +26,7 @@ export default function OAuth() {
         }),
       });
       const data = await res.json();
+      document.cookie = `access_token=${data.token}; path=/`;
       dispatch(signInSuccess(data));
       navigate('/');
     } catch (error) {

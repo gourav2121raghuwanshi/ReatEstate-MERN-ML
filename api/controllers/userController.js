@@ -1,6 +1,6 @@
-const { errorHandler } = require("../utils/error");
+const { errorHandler } = require("../utils/error.js");
 const bcrypt = require('bcrypt');
-const User = require('../models/user.model.js');
+const User = require('../models/userModel.js');
 
 exports.updateUser = async (req, res, next) => {
     try {
@@ -26,8 +26,8 @@ exports.updateUser = async (req, res, next) => {
 
 exports.deleteUser = async (req, res, next) => {
     try {
-        // console.log(req.user.id)
-        // console.log(req.params.id)
+        console.log(req.user.id)
+        console.log(req.params.id)
         if (req.user.id !== req.params.id) {
             return next(errorHandler(401, `You Can Delete Your own account `));
         }
