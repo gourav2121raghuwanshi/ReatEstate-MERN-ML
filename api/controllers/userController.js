@@ -1,8 +1,10 @@
 const { errorHandler } = require("../utils/error");
 const bcrypt = require('bcrypt');
-const User = require('../models/user.model.js')
+const User = require('../models/user.model.js');
+
 exports.updateUser = async (req, res, next) => {
     try {
+        console.log(req.body);
         if (req.user.id !== req.params.id) return next(errorHandler(401, "You Can Only Update Your Own Account"));
         if (req.body.password) {
             req.body.password = bcrypt.hash(req.body.password, 10);
