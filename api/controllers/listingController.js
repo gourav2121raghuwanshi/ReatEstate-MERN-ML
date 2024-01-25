@@ -52,3 +52,21 @@ exports.updateListing = async (req, res, next) => {
         next(err);
     }
 }
+
+
+exports.getListing = async (req, res, next) => {
+    try {
+        const listings = await Listing.findById(req.params.id);
+        if (!listings) {
+            return next(errorHandler(404, "Listing not found"));
+        }
+        res.status(200).json(listings);
+
+        console.log("Error in viewing Listings");
+        return next(errorHandler(401, "You can view your own Listings"));
+
+    } catch (err) {
+        console.log(err);
+        next(err)
+    }
+}
