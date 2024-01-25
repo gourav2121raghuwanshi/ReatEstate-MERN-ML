@@ -144,6 +144,8 @@ const UpdateListing = () => {
         setError(data.message);
         return;
       }
+      console.log(data._id);
+      console.log(data);
       navigate(`/listing/${data._id}`);
     }
     catch (err) {
