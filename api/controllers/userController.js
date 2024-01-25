@@ -4,10 +4,9 @@ const User = require('../models/userModel.js');
 const Listing = require('../models/listingModel.js')
 exports.updateUser = async (req, res, next) => {
     try {
-        console.log(req.body);
         if (req.user.id !== req.params.id) return next(errorHandler(401, "You Can Only Update Your Own Account"));
         if (req.body.password) {
-            req.body.password = bcrypt.hash(req.body.password, 10);
+            req.body.password = await bcrypt.hash(req.body.password, 10);
         }
         const updatedUser = await User.findByIdAndUpdate(req.params.id, {
             $set: {
@@ -18,8 +17,10 @@ exports.updateUser = async (req, res, next) => {
             }
         }, { new: true })
         const { password, ...rest } = updatedUser._doc;
+        // console.log("done");
         res.status(200).json(rest)
     } catch (err) {
+        // console.log(err)
         next(err);
     }
 };
