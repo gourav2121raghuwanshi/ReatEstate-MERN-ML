@@ -73,7 +73,7 @@ const Listing = () => {
                         {listing.imageUrls.map((url) => (
                             <SwiperSlide key={url}>
                                 <div
-                                    className='md:h-[450x] sm:h-[300px] h-[200px] w-full  ' style={{
+                                    className='md:h-[550x] sm:h-[400px] h-[200px] w-full  ' style={{
                                         background: `url(${url}) center no-repeat`, backgroundSize: 'cover', width: '100%', objectFit: 'cover',
                                     }}
                                 ></div>
@@ -119,7 +119,7 @@ const Listing = () => {
                             {
                                 listing.offer && (
                                     <p className='bg-green-900 w-full max-w-[200px] text-white 
-                        text-center p-1 rounded-md '> ₹{+listing.regularPrice - +listing.discountPrice} discount</p>
+                        text-center p-1 rounded-md '> ₹{+listing.regularPrice - +listing.discountPrice} OFF</p>
                                 )
                             }
                         </div>
@@ -139,7 +139,7 @@ const Listing = () => {
                                     Contact Landlord
                                 </button>
                             )}
-                       {contact && <Contact listing={listing}/>}
+                        {contact && <Contact listing={listing} />}
                     </div>
                 </div>
             )}

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import ListingItem from '../components/ListingItem';
 const Search = () => {
 
     const navigate = useNavigate();
@@ -15,7 +16,7 @@ const Search = () => {
     });
     const [loading, setLoading] = useState(false);
     const [listings, setListings] = useState([]);
-    console.log("listings are : " , listings);
+    console.log("listings are : ", listings);
     console.log(sideBardata)
     const handleChange = (e) => {
         if (e.target.id === 'all' || e.target.id === 'rent' || e.target.id === 'sale') {
@@ -74,7 +75,7 @@ const Search = () => {
                     return;
                 }
                 setLoading(false);
-                console.log("data is ",data);
+                console.log("data is ", data);
                 setListings(data);
             }
             catch (err) {
@@ -151,15 +152,15 @@ const Search = () => {
                         </div>
                         <div className='flex gap-2'>
                             <input
-                                checked={sideBardata.type === 'sell'}
+                                checked={sideBardata.type === 'sale'}
                                 onChange={handleChange}
 
                                 type='checkbox'
-                                id='sell'
+                                id='sale'
                                 className='w-5 '
 
                             />
-                            <span> Sell</span>
+                            <span> Sale</span>
                         </div>
                         <div className='flex gap-2'>
                             <input
@@ -224,8 +225,25 @@ const Search = () => {
                 </form>
             </div>
             {/* right */}
-            <div className=' '>
-                <h1 className='text-3xl font-semibold border-b p-3 mt-5 text-slate-700 '>Listing Results: </h1>
+            <div className='flex-1'>
+                <h1 className='text-3xl font-semibold border-b p-3 mt-5 text-slate-700 '>
+                    Listing Results:
+                </h1>
+                <div className='p-7 flex flex-wrap gap-4 '>
+                    {!loading && listings.length === 0 && (
+                        <p className='text-xl  p-3 font-semibold   text-slate-900 '>
+                            No Listing found!
+                        </p>
+                    )}
+                    {loading && (
+                        <p className='text-xl text-slate-700 text-center w-full'>Loading...</p>
+                    )}
+                    {
+                        loading === false && listings && listings.map((listing) => (
+                            <ListingItem key={listing._id} listing={listing} />
+                        ))
+                    }
+                </div>
             </div>
         </div>
     )

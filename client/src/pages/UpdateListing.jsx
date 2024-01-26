@@ -359,7 +359,7 @@ const UpdateListing = () => {
           </div>
 
           <button className='sm:p-4 p-2 w-full sm:text-2xl text-lg  bg-slate-700 text-white rounded-lg shadow-lg uppercase hover:opacity-95 disabled:opacity-80 '>
-            {loading ? "Creating..." : 'Update Listing'}
+            {loading ? "Updating..." : 'Update Listing'}
           </button>
           {error && <p className='text-red-700 text-sm sm:text-lg md:text-xl '>{error}</p>}
         </div>
