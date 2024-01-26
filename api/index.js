@@ -6,8 +6,7 @@ const userroute = require('./routes/userRoute.js')
 const authRouter = require('./routes/authRoute.js');
 const listingRouter = require('./routes/listingRouter.js');
 require('dotenv').config();
-
-// const cors = require('cors');
+const cors = require('cors');
 
 mongoose.connect(process.env.DBURL)
   .then(() => console.log("connected to DataBase"))
@@ -20,6 +19,7 @@ __dirname = path.resolve();
 const app = express();
 app.use(express.json())
 app.use(cookieParser());
+app.use(cors());
 app.listen(process.env.PORT, () => {
   console.log(`server is running on port ${process.env.PORT}`);
 })
@@ -44,9 +44,4 @@ app.use((err, req, res, next) => {
 });
 
 
-// app.use(
-//   cors({
-//     origin: "http://localhost:5173",
-//     credentials: true,
-//   })
-// );
+

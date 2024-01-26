@@ -138,16 +138,17 @@ export default function Profile() {
   const handleShowListings = async () => {
     try {
       setshowListingError(false);
-      const res = await axios.get(`/api/user/listings/${currentUser._id}`);
-      const data = await res.data;
+      const res = await fetch(`/api/user/listings/${currentUser._id}`);
+      const data = await res.json();
+      console.log(data);
       if (data.success === false) {
         setshowListingError(true);
         return;
       }
       setUserListings(data);
-      // console.log(data);
+      
     } catch (err) {
-      showListingError(true);
+      setshowListingError(true);
     }
   }
 
