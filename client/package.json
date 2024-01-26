@@ -25,6 +25,7 @@
     "realestate": "file:..",
     "redux": "^5.0.1",
     "redux-persist": "^6.0.0",
+    "rollup": "^4.9.6",
     "swiper": "^11.0.5",
     "url": "^0.11.3",
     "url-search-params-polyfill": "^8.2.5"
