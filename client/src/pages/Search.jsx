@@ -16,8 +16,10 @@ const Search = () => {
     });
     const [loading, setLoading] = useState(false);
     const [listings, setListings] = useState([]);
-    console.log("listings are : ", listings);
-    console.log(sideBardata)
+
+    const [showMore, setShowMore] = useState(false);
+    // console.log("listings are : ", listings);
+    // console.log(sideBardata)
     const handleChange = (e) => {
         if (e.target.id === 'all' || e.target.id === 'rent' || e.target.id === 'sale') {
             setSideBarData({ ...sideBardata, type: e.target.id });
@@ -67,6 +69,7 @@ const Search = () => {
         const fetchListings = async () => {
             try {
                 setLoading(true);
+                setShowMore(false);
                 const searchQuery = urlParams.toString();
                 const res = await axios.get(`/api/listing/get?${searchQuery}`);
                 const data = await res.data;
@@ -74,6 +77,11 @@ const Search = () => {
                     setLoading(false);
                     return;
                 }
+                if (data.length > 8) {
+                    setShowMore(true);
+                }
+                else setShowMore(false);
+
                 setLoading(false);
                 console.log("data is ", data);
                 setListings(data);
@@ -88,6 +96,22 @@ const Search = () => {
 
     }, [location.search]);
 
+    const onShowMoreClick = async () => {
+        const numberOfListings = listings.length;
+        const startIndex = numberOfListings;
+        const urlParams = new URLSearchParams(location.search);
+        urlParams.set('startIndex', startIndex);
+        const searchQuery = urlParams.toString();
+
+        const res = await axios.get(`/api/listing/get?${searchQuery}`);
+        const data = await res.data;
+        if (data.length < 9) {
+            setShowMore(false);
+        }
+        setListings([...listings, ...data]);
+
+
+    }
     const handleSubmit = (e) => {
         e.preventDefault();
         const urlParams = new URLSearchParams();
@@ -241,11 +265,17 @@ const Search = () => {
                     {
                         loading === false && listings && listings.map((listing) => (
                             <ListingItem key={listing._id} listing={listing} />
-                        ))
-                    }
+                        ))}
+                    {showMore && (
+                        <button
+                            className='text-xl text-green-800 hover:underline p-7 text-center w-full '
+                            onClick={onShowMoreClick}>
+                            Show More
+                        </button>
+                    )}
                 </div>
             </div>
-        </div>
+        </div >
     )
 }
 
