@@ -70,7 +70,7 @@ const SignUp = () => {
         </input>
         <input type="text" placeholder='email' value={formdata.email} className='sm:text-xl font-semibold border p-3 rounded-lg ' id='email' onChange={handleChange} >
         </input>
-        <input type="text" placeholder='password' value={formdata.password} className='sm:text-xl font-semibold border p-3 rounded-lg ' id='password' onChange={handleChange} >
+        <input type="password" placeholder='password' value={formdata.password} className='sm:text-xl font-semibold border p-3 rounded-lg ' id='password' onChange={handleChange} >
         </input>
         <button disabled={loading} className='bg-slate-700 text-white p-3 sm:text-xl py-3  rounded-lg uppercase hover:opacity-95 disabled:opacity-80 transition-all  duration-200' >
           {loading ? 'Loading...' : 'Sign up'}
