@@ -48,7 +48,7 @@ const SignUp = () => {
   
       setLoading(false);
       setError(null)
-      navigate('/')
+      navigate('/sign-in')
       // console.log(data);
     } catch (error) {
       setLoading(false);
