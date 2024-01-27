@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   updateUserStart,
   updateUserSuccess,
@@ -35,7 +36,7 @@ export default function Profile() {
   const dispatch = useDispatch();
   const [showListingError, setshowListingError] = useState(false);
   const [userListings, setUserListings] = useState([]);
-
+  const navigate=useNavigate();
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
