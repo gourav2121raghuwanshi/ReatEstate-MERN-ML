@@ -37,9 +37,9 @@ const Header = () => {
       <div className='glass-panel mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between'>
         <div className='flex items-center justify-between gap-4'>
           <Link to='/' className='group flex items-center gap-3'>
-            <div className='flex h-12 w-12 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,_#1f5a46,_#123829)] text-white shadow-lg'>
+            {/* <div className='flex h-12 w-12 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,_#1f5a46,_#123829)] text-white shadow-lg'>
               <FaRegCompass className='text-lg' />
-            </div>
+            </div> */}
             <div>
               <p className='font-[Fraunces] text-2xl font-semibold leading-none text-[color:var(--text)] sm:text-3xl'>
                 FindYourHome
