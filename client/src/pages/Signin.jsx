@@ -1,24 +1,22 @@
-import React from 'react'
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
 import axios from 'axios';
-// import ClipLoader from "react-spinners/ClipLoader";
 import { useDispatch, useSelector } from 'react-redux';
-import { signInStart, signInSuccess, signInFailure } from "../redux/user/userSlice"
+import { signInFailure, signInStart, signInSuccess } from '../redux/user/userSlice';
 import OAuth from '../components/OAuth';
 
 const Signin = () => {
-  const [formdata, setformdata] = useState({
+  const [formdata, setFormdata] = useState({
     email: '',
     password: '',
   });
-  const buri=import.meta.env.VITE_BACKEND_URI
- 
+  const buri = import.meta.env.VITE_BACKEND_URI;
   const { loading, error } = useSelector((state) => state.user);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
   const handleChange = (e) => {
-    setformdata({
+    setFormdata({
       ...formdata,
       [e.target.id]: e.target.value,
     });
@@ -27,64 +25,90 @@ const Signin = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-     // console.log("in sing in")
       dispatch(signInStart());
 
-      const res = await axios.post(buri+'/auth/signin', formdata, {
+      const res = await axios.post(`${buri}/auth/signin`, formdata, {
         headers: {
           'Content-Type': 'application/json',
         },
-        withCredentials: true, 
+        withCredentials: true,
       });
       const data = await res.data;
-      console.log("data is : ",data)
-      console.log(res)
 
       if (data.success === false) {
         dispatch(signInFailure(data.message));
         return;
       }
-      console.log(data.token);
-      // document.cookie = `access_token=${data.token}; path=/`;
-      
-      //console.log("user is : ",data)
-      dispatch(signInSuccess(data));
-      navigate('/')
 
-    } catch (error) {
-      dispatch(signInFailure());
-      console.error('Error:', error.message);
+      dispatch(signInSuccess(data));
+      navigate('/');
+    } catch (submitError) {
+      dispatch(signInFailure(submitError.message));
     }
   };
 
   return (
-    <div className='p-5 max-w-2xl mx-auto'>
-      <h1 className='text-2xl sm:text-4xl text-slate-700 text-center font-semibold my-7 '>
-        Sign In
-      </h1>
-      <form onSubmit={handleSubmit} className='flex flex-col gap-4 '>
+    <div className='page-shell'>
+      <div className='glass-panel-strong hero-mesh relative overflow-hidden p-4 sm:p-6 lg:p-8'>
+        <div className='grid gap-6 lg:grid-cols-[0.95fr_1.05fr]'>
+          <div className='rounded-[28px] bg-[linear-gradient(160deg,_#173729,_#214d3b)] p-8 text-white'>
+            <span className='eyebrow !border-white/20 !bg-white/10 !text-white'>Welcome back</span>
+            <h1 className='mt-6 font-[Fraunces] text-4xl leading-tight sm:text-5xl'>
+              Return to your curated property dashboard.
+            </h1>
+            <p className='mt-5 max-w-lg text-sm leading-7 text-white/76 sm:text-base'>
+              Pick up where you left off, manage listings, and continue exploring homes
+              through a more refined real estate experience.
+            </p>
+          </div>
 
-        <input type="text" placeholder='email' value={formdata.email} className='sm:text-xl font-semibold border p-3 rounded-lg ' id='email' onChange={handleChange} >
-        </input>
-        <input type="password" placeholder='password' value={formdata.password} className='sm:text-xl font-semibold border p-3 rounded-lg ' id='password' onChange={handleChange} >
-        </input>
-        <button disabled={loading} className='bg-slate-700 text-white p-3  py-3  rounded-lg uppercase sm:text-xl hover:opacity-95 disabled:opacity-80 transition-all  duration-200' >
-          {loading ? 'Loading...' : 'Sign in'}
-        </button>
-        <OAuth />
-      </form>
-      <div className='flex gap-3 mt-5 sm:text-xl font-semibold'>
-        <p>Dont have an account? </p>
-        <Link to={'/sign-up'}>
-          <span className='text-blue-700 ' >
-            Sign Up
-          </span>
-        </Link>
+          <div className='glass-panel p-6 sm:p-8'>
+            <h2 className='section-heading !text-3xl'>Sign In</h2>
+            <p className='section-copy mt-2'>Access saved listings, profile tools, and review features.</p>
+            <form onSubmit={handleSubmit} className='mt-8 flex flex-col gap-4'>
+              <div>
+                <label htmlFor='email' className='field-label'>
+                  Email
+                </label>
+                <input
+                  type='text'
+                  placeholder='you@example.com'
+                  value={formdata.email}
+                  className='field-shell'
+                  id='email'
+                  onChange={handleChange}
+                />
+              </div>
+              <div>
+                <label htmlFor='password' className='field-label'>
+                  Password
+                </label>
+                <input
+                  type='password'
+                  placeholder='Enter your password'
+                  value={formdata.password}
+                  className='field-shell'
+                  id='password'
+                  onChange={handleChange}
+                />
+              </div>
+              <button disabled={loading} className='btn-primary mt-2 w-full !rounded-[22px] !py-4 uppercase'>
+                {loading ? 'Loading...' : 'Sign In'}
+              </button>
+              <OAuth />
+            </form>
+            <div className='mt-6 text-sm font-semibold text-[color:var(--muted)] sm:text-base'>
+              Don&apos;t have an account?{' '}
+              <Link to='/sign-up' className='text-[color:var(--accent)]'>
+                Sign Up
+              </Link>
+            </div>
+            {error && <p className='mt-5 text-sm font-semibold text-[#9f3f36] sm:text-base'>{error}</p>}
+          </div>
+        </div>
       </div>
-      {error && <p className='text-red-500 mt-5 font-semibold text-xl '>{error}</p>}
-
     </div>
-  )
-}
+  );
+};
 
 export default Signin;

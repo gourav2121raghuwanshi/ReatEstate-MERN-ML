@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react'
-import { useSelector } from 'react-redux'
-import { useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import React, { useEffect, useRef, useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { useNavigate, Link } from 'react-router-dom';
 import {
   updateUserStart,
   updateUserSuccess,
@@ -11,21 +10,16 @@ import {
   deleteUserFailure,
   signoutUserStart,
   signoutUserSuccess,
-  signoutUserFailure
-} from "../redux/user/userSlice";
-import { useDispatch } from 'react-redux';
-import {
-  getDownloadURL,
-  getStorage,
-  ref,
-  uploadBytesResumable,
-} from 'firebase/storage';
-import { app } from '../firebase'
-import axios from 'axios'
-import { Link } from 'react-router-dom'
+  signoutUserFailure,
+} from '../redux/user/userSlice';
+import { getDownloadURL, getStorage, ref, uploadBytesResumable } from 'firebase/storage';
+import { app } from '../firebase';
+import axios from 'axios';
+
+const FALLBACK_IMAGE =
+  'https://cdn.pixabay.com/photo/2017/06/16/15/58/luxury-home-2409518_640.jpg';
 
 export default function Profile() {
-
   const { currentUser, loading, error } = useSelector((state) => state.user);
   const fileRef = useRef(null);
   const [file, setFile] = useState(undefined);
@@ -33,48 +27,52 @@ export default function Profile() {
   const [fileUploadError, setFileUploadError] = useState(false);
   const [formData, setFormData] = useState({});
   const [updateSuccess, setUpdateSuccess] = useState(false);
-  const dispatch = useDispatch();
-  const [showListingError, setshowListingError] = useState(false);
+  const [showListingError, setShowListingError] = useState(false);
   const [userListings, setUserListings] = useState([]);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const buri = import.meta.env.VITE_BACKEND_URI;
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
 
-  
-  const buri = import.meta.env.VITE_BACKEND_URI
-
-  // if (currentUser) {
-  //   console.log("curentUser")
-  //   console.log(JSON.stringify(currentUser, null, 2));
-  // }
-
   useEffect(() => {
     if (file) {
-      handleFileUpload(file);
+      const storage = getStorage(app);
+      const fileName = new Date().getTime() + file.name;
+      const storageRef = ref(storage, fileName);
+      const uploadTask = uploadBytesResumable(storageRef, file);
+
+      uploadTask.on(
+        'state_changed',
+        (snapshot) => {
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          setFilePerc(Math.round(progress));
+        },
+        () => {
+          setFileUploadError(true);
+        },
+        () => {
+          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) =>
+            setFormData((prev) => ({ ...prev, avatar: downloadURL }))
+          );
+        }
+      );
     }
   }, [file]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-
-      // setFormData((prevData) => ({
-      //   ...prevData,
-      //   token: currentUser.token, // Add token to formData
-      // }));
-      // console.log("formData is "+formData.password);
-
       dispatch(updateUserStart());
-      // console.log(formData);
-      const res = await axios.post(buri + `/user/update/${currentUser._id}`, formData, {
+      const res = await axios.post(`${buri}/user/update/${currentUser._id}`, formData, {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${currentUser.token}`, // Send the token in Authorization header
+          Authorization: `Bearer ${currentUser.token}`,
         },
-        withCredentials: true
+        withCredentials: true,
       });
-      console.log(res);
       const data = await res.data;
 
       if (data.success === false) {
@@ -82,54 +80,22 @@ export default function Profile() {
         return;
       }
 
-      const tkn = currentUser.token;
-      // console.log("inside profile section : ")
-      // console.log(data); // Check the structure of data
-      // console.log(tkn); // Check the token value
-
-      dispatch(updateUserSuccess({ ...data, token: tkn }));
+      dispatch(updateUserSuccess({ ...data, token: currentUser.token }));
       setUpdateSuccess(true);
-    } catch (error) {
-      // console.log(error);
-      dispatch(updateUserFailure(error.message));
+    } catch (submitError) {
+      dispatch(updateUserFailure(submitError.message));
     }
-  };
-
-  const handleFileUpload = (file) => {
-
-    const storage = getStorage(app);
-    const fileName = new Date().getTime() + file.name;
-    const storageRef = ref(storage, fileName);
-    const uploadTask = uploadBytesResumable(storageRef, file);
-
-    uploadTask.on(
-      'state_changed',
-      (snapshot) => {
-        const progress =
-          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        setFilePerc(Math.round(progress));
-      },
-      (error) => {
-        setFileUploadError(true);
-      },
-      () => {
-        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) =>
-          setFormData({ ...formData, avatar: downloadURL })
-        );
-      }
-    );
   };
 
   const handleDeleteUser = async () => {
     try {
       dispatch(deleteUserStart());
-      console.log(currentUser._id);
-      const res = await axios.delete(buri + `/user/delete/${currentUser._id}`, {
+      const res = await axios.delete(`${buri}/user/delete/${currentUser._id}`, {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${currentUser.token}`, // Send the token in Authorization header
+          Authorization: `Bearer ${currentUser.token}`,
         },
-        withCredentials: true
+        withCredentials: true,
       });
       const data = await res.data;
 
@@ -139,194 +105,234 @@ export default function Profile() {
       }
       dispatch(deleteUserSuccess(data));
       navigate('/sign-up');
+    } catch (deleteError) {
+      dispatch(deleteUserFailure(deleteError.message));
     }
-    catch (err) {
-      dispatch(deleteUserFailure(err.message));
-      <p className='text-red-600 font-semibold sm:text-2xl text-lg mt-7'>{error ? error.message : ""}</p>
-
-    }
-  }
+  };
 
   const handleSignOut = async () => {
     try {
-      dispatch(signoutUserStart())
-      const res = await axios.get(buri + `/auth/signout`, {
+      dispatch(signoutUserStart());
+      const res = await axios.get(`${buri}/auth/signout`, {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${currentUser.token}`, // Send the token in Authorization header
+          Authorization: `Bearer ${currentUser.token}`,
         },
-        withCredentials: true
+        withCredentials: true,
       });
       const data = await res.data;
       if (data.success === false) {
-        dispatch(signoutUserFailure(data.message))
+        dispatch(signoutUserFailure(data.message));
         return;
       }
-      dispatch(signoutUserSuccess(data))
+      dispatch(signoutUserSuccess(data));
+    } catch (signOutError) {
+      dispatch(signoutUserFailure(signOutError.message));
     }
-    catch (err) {
-      dispatch(signoutUserFailure(err.message))
-    }
-  }
-
+  };
 
   const handleShowListings = async () => {
     try {
-      // console.log("token " + currentUser.token);
-      // console.log("token " + currentUser);
-      setshowListingError(false); const res = await fetch(`${buri}/user/listings/${currentUser._id}`, {
+      setShowListingError(false);
+      const res = await fetch(`${buri}/user/listings/${currentUser._id}`, {
         method: 'GET',
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${currentUser.token}`, // Send the token in Authorization header
+          Authorization: `Bearer ${currentUser.token}`,
         },
       });
       const data = await res.json();
-      console.log(data);
       if (data.success === false) {
-        setshowListingError(true);
+        setShowListingError(true);
         return;
       }
       setUserListings(data);
-
     } catch (err) {
-      setshowListingError(true);
+      setShowListingError(true);
     }
-  }
+  };
 
   const handleListingDelete = async (listingId) => {
     try {
-      const res = await axios.delete(buri + `/listing/delete/${listingId}`, {
+      const res = await axios.delete(`${buri}/listing/delete/${listingId}`, {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${currentUser.token}`, // Send the token in Authorization header
+          Authorization: `Bearer ${currentUser.token}`,
         },
-        withCredentials: true
+        withCredentials: true,
       });
       const data = await res.data;
       if (data.success === false) {
-        console.log(data.message);
         return;
       }
       setUserListings((prev) => prev.filter((listing) => listing._id !== listingId));
-
     } catch (err) {
-      console.log(err)
+      console.log(err);
     }
-  }
+  };
+
   return (
-    <div className='p-3 max-w-xl mx-auto ' >
-      <h1 className='sm:text-4xl text-2xl text-gray-700 font-bold text-center my-7 '>Profile</h1>
-      <form onSubmit={handleSubmit} className='flex flex-col   gap-6'>
-        <input
-          onChange={(e) => setFile(e.target.files[0])}
-          type='file'
-          ref={fileRef}
-          accept='image/*'
-          hidden
-        />
-        <img
-          src={formData.avatar || currentUser.avatar}
-          onClick={() => fileRef.current.click()}
-          alt="profile image"
-          loading='lazy'
-          className='rounded-full h-20 w-20  sm:h-40 sm:w-40 object-cover cursor-pointer mt-4 self-center'
-        />
-        <p className='text-sm self-center'>
-          {
-            fileUploadError ?
-              <span className='text-red-700 text-xl font-semibold'>Error in Image Uploading (image must be less than 2Mb )</span> :
-              filePerc > 0 && filePerc < 100 ?
-                <span className='text-slate-700 text-xl font-semibold'> Uploading {filePerc}% </span> :
-                filePerc === 100 ? <span className='text-green-700 text-xl font-semibold'>Image Uploaded Successfully</span> : ""
-          }
-        </p>
-        <input
-          type='text'
-          placeholder='username'
-          defaultValue={currentUser.username}
-          className='border ring-opacity-50 shadow-lg border-grey-200 sm:text-2xl p-1 sm:p-5 rounded-lg '
-          id='username'
-          onChange={handleChange}
-        />
-        <input type='text'
-          placeholder='email' defaultValue={currentUser.email}
-          className='border border-grey-200 ring-opacity-50 shadow-lg sm:text-2xl p-1 sm:p-5 rounded-lg '
-          id='email'
-          onChange={handleChange}
-        />
-        <input type='password'
-          placeholder='password' defaultValue={currentUser.password}
-          className='border border-grey-200  ring-opacity-50 shadow-lg sm:text-2xl p-1 sm:p-5 rounded-lg '
-          id='password'
-          onChange={handleChange}
-        />
-        <button disabled={loading} className='bg-slate-700 text-white  sm:text-2xl text-lg font-semibold rounded-lg p-1 sm:p-5 uppercase hover:opacity-95 disabled:opacity-80'>
-          {loading ? 'Loading...' : 'Update'}
-        </button>
-        <Link className='bg-green-700 text-white sm:text-2xl text-lg font-semibold rounded-lg p-1 sm:p-5  uppercase text-center hover:opacity-95'
-          to='/create-listing' >
-          create Listing
-        </Link>
-      </form>
-      <div className='flex justify-between mt-4'>
-        <span onClick={handleDeleteUser} className='text-red-500 text-lg sm:text-xl md:text-2xl font-semibold   cursor-pointer'>Delete Account</span>
-        <span onClick={handleSignOut} className='text-red-500 text-lg sm:text-xl md:text-2xl font-semibold   cursor-pointer'>Sign Out</span>
-      </div>
-
-      <p className='text-red-600 font-semibold sm:text-2xl text-lg mt-7'>{error ? error.message : ""}
-      </p>
-      <p
-        className='text-green-600 font-semibold sm:text-2xl text-lg mt-7'>
-        {updateSuccess ? 'User is Updated Successfully!!' : ""}
-      </p>
-      <div className='w-full flex justify-center items-center'>
-        <button
-          onClick={handleShowListings}
-          className='text-green-900 w-fit mx-auto sm:text-2xl text-lg font-semibold rounded-lg p-1 sm:p-5 uppercase hover:opacity-95 disabled:opacity-80 '>
-          Show Listings
-        </button>
-      </div>
-
-      <p className='text-red-700 text-xl font-semibold mt-5'>
-        {showListingError ?
-          'Error Showing Listings' : ''
-        }
-      </p>
-
-      {userListings && userListings.length > 0 &&
-        <div className='flex flex-col gap-4 sm:gap-6 md:gap-8'>
-          <h1 className='text-center mt-5 sm:mt-6 md:mt-8 text- xl sm:text-3xl md:text-5xl font-semi-bold text-gray-700'>
-            Your Listings
-          </h1>
-          {userListings.map((listing, index) => (
-            <div key={listing._id} className='flex sm:flex-row  gap-2 md:gap-4  border rounded-lg  justify-between items-center sm:p-2 md:p-4 p-1'>
-              <Link to={`/listing/${listing._id}`} >
-                <img
-                  loading='lazy'
-                  src={listing.imageUrls[0]}
-                  alt="listing img"
-                  className='sm:h-36 sm:w-36 h-20 w-20 md:h-60 md:w-60 object-contain rounded-lg'
-                />
-              </Link>
-              <Link className='flex-1 text-slate-700 font-semibold
-               text-lg sm:text-xl md:text-2xl  hover:underline truncate' to={`/listing/${listing._id}`}  >
-                <p >
-                  {listing.name}
-                </p>
-              </Link>
-              <div className='flex flex-col gap-1 sm:gap-2 items-center md:gap-3'>
-                <button onClick={() => handleListingDelete(listing._id)} className='text-red-700 uppercase text-lg sm:text-xl md:text-2xl font-semibold'>Delete </button>
-                <Link to={`/update-listing/${listing._id}`} >
-                  <button className='text-blue-700 uppercase text-lg sm:text-xl md:text-2xl font-semibold'>Edit </button>
-                </Link>
-              </div>
+    <div className='page-shell'>
+      <div className='grid gap-6 xl:grid-cols-[0.95fr_1.05fr]'>
+        <section className='glass-panel-strong p-6 sm:p-8'>
+          <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
+            <div>
+              <span className='eyebrow'>Profile studio</span>
+              <h1 className='section-heading mt-4'>Manage your account</h1>
             </div>
-          ))}
-        </div>
-      }
+            <button onClick={handleSignOut} className='btn-secondary w-fit !text-[#9f3f36]'>
+              Sign Out
+            </button>
+          </div>
 
+          <form onSubmit={handleSubmit} className='mt-8 flex flex-col gap-5'>
+            <input
+              onChange={(e) => setFile(e.target.files[0])}
+              type='file'
+              ref={fileRef}
+              accept='image/*'
+              hidden
+            />
+            <div className='flex flex-col items-center gap-4'>
+              <img
+                src={formData.avatar || currentUser.avatar}
+                onClick={() => fileRef.current.click()}
+                alt='profile'
+                loading='lazy'
+                className='h-28 w-28 cursor-pointer rounded-[28px] object-cover ring-4 ring-white/60 sm:h-36 sm:w-36'
+              />
+              <p className='text-center text-sm font-semibold text-[color:var(--muted)]'>
+                {fileUploadError
+                  ? 'Error uploading image (must be under 2MB).'
+                  : filePerc > 0 && filePerc < 100
+                    ? `Uploading ${filePerc}%`
+                    : filePerc === 100
+                      ? 'Image uploaded successfully'
+                      : 'Tap your photo to update it.'}
+              </p>
+            </div>
+
+            <div>
+              <label htmlFor='username' className='field-label'>
+                Username
+              </label>
+              <input
+                type='text'
+                placeholder='username'
+                defaultValue={currentUser.username}
+                className='field-shell'
+                id='username'
+                onChange={handleChange}
+              />
+            </div>
+            <div>
+              <label htmlFor='email' className='field-label'>
+                Email
+              </label>
+              <input
+                type='text'
+                placeholder='email'
+                defaultValue={currentUser.email}
+                className='field-shell'
+                id='email'
+                onChange={handleChange}
+              />
+            </div>
+            <div>
+              <label htmlFor='password' className='field-label'>
+                Password
+              </label>
+              <input
+                type='password'
+                placeholder='password'
+                className='field-shell'
+                id='password'
+                onChange={handleChange}
+              />
+            </div>
+
+            <button disabled={loading} className='btn-primary w-full !rounded-[22px] !py-4 uppercase'>
+              {loading ? 'Loading...' : 'Update Profile'}
+            </button>
+            <Link to='/create-listing' className='btn-secondary w-full !rounded-[22px] !py-4 text-center uppercase'>
+              Create Listing
+            </Link>
+          </form>
+
+          <div className='mt-6 flex flex-wrap items-center justify-between gap-4 text-sm font-semibold sm:text-base'>
+            <button onClick={handleDeleteUser} className='text-[#9f3f36]'>
+              Delete Account
+            </button>
+            <button onClick={handleShowListings} className='text-[color:var(--accent)]'>
+              Show Listings
+            </button>
+          </div>
+
+          {error && <p className='mt-5 text-sm font-semibold text-[#9f3f36]'>{error}</p>}
+          {updateSuccess && (
+            <p className='mt-5 text-sm font-semibold text-[color:var(--accent)]'>
+              User updated successfully.
+            </p>
+          )}
+          {showListingError && (
+            <p className='mt-5 text-sm font-semibold text-[#9f3f36]'>Error showing listings.</p>
+          )}
+        </section>
+
+        <section className='glass-panel-strong p-6 sm:p-8'>
+          <div className='flex items-end justify-between gap-4'>
+            <div>
+              <p className='text-sm font-semibold uppercase tracking-[0.24em] text-[color:var(--accent)]'>
+                Listing management
+              </p>
+              <h2 className='section-heading mt-2 !text-3xl'>Your published spaces</h2>
+            </div>
+            <span className='text-sm text-[color:var(--muted)]'>{userListings.length} listings</span>
+          </div>
+
+          <div className='mt-6 space-y-4'>
+            {userListings.length === 0 && (
+              <div className='glass-panel p-8 text-center text-sm font-semibold text-[color:var(--muted)]'>
+                No listings loaded yet. Use "Show Listings" to fetch your properties.
+              </div>
+            )}
+
+            {userListings.map((listing) => (
+              <div
+                key={listing._id}
+                className='glass-panel flex flex-col gap-4 p-4 sm:flex-row sm:items-center'
+              >
+                <Link to={`/listing/${listing._id}`}>
+                  <img
+                    loading='lazy'
+                    src={listing?.imageUrls?.[0] || FALLBACK_IMAGE}
+                    alt={listing.name}
+                    className='h-28 w-full rounded-[22px] object-cover sm:w-36'
+                  />
+                </Link>
+                <div className='min-w-0 flex-1'>
+                  <Link
+                    className='line-clamp-1 text-xl font-bold text-[color:var(--text)]'
+                    to={`/listing/${listing._id}`}
+                  >
+                    {listing.name}
+                  </Link>
+                  <p className='mt-2 text-sm text-[color:var(--muted)]'>{listing.address}</p>
+                </div>
+                <div className='flex gap-3 sm:flex-col'>
+                  <button onClick={() => handleListingDelete(listing._id)} className='btn-secondary !text-[#9f3f36]'>
+                    Delete
+                  </button>
+                  <Link to={`/update-listing/${listing._id}`} className='btn-primary text-center'>
+                    Edit
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
     </div>
-  )
+  );
 }

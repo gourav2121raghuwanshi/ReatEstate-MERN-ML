@@ -1,8 +1,209 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-body{
-    background-color: rgb(241,245,241);
-   
+:root {
+  color-scheme: light;
+  --bg: #f4efe6;
+  --bg-soft: #fbf8f2;
+  --surface: rgba(255, 252, 247, 0.82);
+  --surface-strong: rgba(255, 251, 245, 0.96);
+  --surface-dark: #143126;
+  --line: rgba(50, 70, 58, 0.14);
+  --text: #183126;
+  --muted: #6e786e;
+  --accent: #1f5a46;
+  --accent-strong: #123829;
+  --accent-soft: #d9e6db;
+  --sand: #e9dcc4;
+  --sun: #c88f52;
+  --danger: #9f3f36;
+  --shadow-lg: 0 30px 90px rgba(21, 38, 29, 0.16);
+  --shadow-md: 0 20px 50px rgba(30, 47, 36, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: 'Manrope', sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(circle at top left, rgba(200, 143, 82, 0.16), transparent 28%),
+    radial-gradient(circle at 85% 15%, rgba(31, 90, 70, 0.14), transparent 22%),
+    linear-gradient(180deg, #f7f2ea 0%, #f1ede4 54%, #eee9df 100%);
+  background-attachment: fixed;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+::selection {
+  background: rgba(31, 90, 70, 0.18);
+  color: var(--accent-strong);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(20, 49, 38, 0.05);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(20, 49, 38, 0.32);
+  border-radius: 999px;
+}
+
+@layer components {
+  .app-shell {
+    @apply relative overflow-hidden;
+  }
+
+  .page-shell {
+    @apply relative mx-auto w-full max-w-7xl px-4 pb-16 pt-8 sm:px-6 lg:px-8 lg:pt-10;
+  }
+
+  .glass-panel {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow-md);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    @apply rounded-[28px];
+  }
+
+  .glass-panel-strong {
+    background: var(--surface-strong);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow-lg);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    @apply rounded-[32px];
+  }
+
+  .section-heading {
+    font-family: 'Fraunces', serif;
+    @apply text-3xl font-semibold tracking-tight text-[color:var(--text)] sm:text-4xl;
+  }
+
+  .section-copy {
+    @apply text-sm leading-7 text-[color:var(--muted)] sm:text-base;
+  }
+
+  .eyebrow {
+    @apply inline-flex w-fit items-center rounded-full border border-[color:var(--line)] bg-white/50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-[color:var(--accent)];
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center whitespace-nowrap rounded-full px-5 py-3 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
+    box-shadow: 0 16px 30px rgba(18, 56, 41, 0.24);
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center whitespace-nowrap rounded-full border px-5 py-3 text-sm font-semibold transition duration-300 hover:-translate-y-0.5;
+    border-color: var(--line);
+    background: rgba(255, 255, 255, 0.46);
+    color: var(--text);
+  }
+
+  .field-shell {
+    @apply w-full rounded-[22px] border px-4 py-3 text-sm text-[color:var(--text)] outline-none transition duration-200 placeholder:text-[color:var(--muted)] focus:ring-2 sm:text-base;
+    border-color: var(--line);
+    background: rgba(255, 255, 255, 0.72);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    --tw-ring-color: rgba(31, 90, 70, 0.18);
+  }
+
+  .field-label {
+    @apply mb-2 block text-sm font-semibold uppercase tracking-[0.16em] text-[color:var(--muted)];
+  }
+
+  .toggle-chip {
+    @apply inline-flex cursor-pointer items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition;
+    border-color: var(--line);
+    background: rgba(255, 255, 255, 0.55);
+    color: var(--text);
+  }
+
+  .stat-card {
+    @apply rounded-[24px] border p-5;
+    border-color: var(--line);
+    background: rgba(255, 255, 255, 0.56);
+  }
+
+  .hero-title {
+    font-family: 'Fraunces', serif;
+    @apply text-4xl font-semibold leading-tight text-[color:var(--text)] sm:text-5xl lg:text-7xl;
+  }
+
+  .soft-divider {
+    @apply h-px w-full;
+    background: linear-gradient(90deg, transparent, rgba(20, 49, 38, 0.22), transparent);
+  }
+}
+
+.hero-mesh::before,
+.hero-mesh::after {
+  content: '';
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(4px);
+  pointer-events: none;
+}
+
+.hero-mesh::before {
+  top: -120px;
+  right: -60px;
+  height: 260px;
+  width: 260px;
+  background: radial-gradient(circle, rgba(200, 143, 82, 0.26), transparent 70%);
+}
+
+.hero-mesh::after {
+  bottom: -140px;
+  left: -80px;
+  height: 320px;
+  width: 320px;
+  background: radial-gradient(circle, rgba(31, 90, 70, 0.18), transparent 70%);
+}
+
+.swiper-button-next,
+.swiper-button-prev {
+  color: #fff !important;
+  background: rgba(18, 56, 41, 0.56);
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 999px;
+  backdrop-filter: blur(10px);
+}
+
+.swiper-button-next::after,
+.swiper-button-prev::after {
+  font-size: 18px !important;
+  font-weight: 800;
 }

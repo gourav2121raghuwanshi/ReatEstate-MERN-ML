@@ -6,19 +6,18 @@ import { useNavigate } from 'react-router-dom';
 
 export default function OAuth() {
   const dispatch = useDispatch();
-  
-  const buri=import.meta.env.VITE_BACKEND_URI
+  const buri = import.meta.env.VITE_BACKEND_URI;
   const navigate = useNavigate();
+
   const handleGoogleClick = async () => {
     try {
       const provider = new GoogleAuthProvider();
       const auth = getAuth(app);
       const result = await signInWithPopup(auth, provider);
 
-
-      const res = await fetch(buri + '/auth/google', {
+      const res = await fetch(`${buri}/auth/google`, {
         method: 'POST',
-        credentials: 'include', // Use this line only once
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -29,22 +28,20 @@ export default function OAuth() {
         }),
       });
       const data = await res.json();
-      // console.log(data);
-      // console.log(data.token);
-      // document.cookie = `access_token=${data.token}; path=/`;
       dispatch(signInSuccess(data));
       navigate('/');
     } catch (error) {
       console.log('could not sign in with google', error);
     }
   };
+
   return (
     <button
       onClick={handleGoogleClick}
       type='button'
-      className='bg-red-700 text-white p-3 rounded-lg uppercase hover:opacity-95'
+      className='btn-secondary w-full !rounded-[22px] !border-[#d7b48f] !bg-[#fff4e8] !py-4 !text-[color:var(--accent-strong)]'
     >
-      Continue with google
+      Continue with Google
     </button>
   );
 }

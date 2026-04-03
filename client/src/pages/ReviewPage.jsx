@@ -1,107 +1,100 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { FaStar } from 'react-icons/fa';
 
 const ReviewPage = () => {
+  const [formData, setFormData] = useState({ rating: 0, review: '' });
+  const { currentUser } = useSelector((state) => state.user);
+  const navigate = useNavigate();
+  const buri = import.meta.env.VITE_BACKEND_URI;
 
-    const [formData, setFormData] = useState({ rating: 0, review: "" });
-    const { currentUser } = useSelector(state => state.user);
-    const navigate = useNavigate();
-    const buri=import.meta.env.VITE_BACKEND_URI
- 
-    useEffect(() => {
-        const getReview = async () => {
-            try {
-                const res = await axios.get(buri+`/rateus/ReviewOfCurrentUser/${currentUser._id}`,{
-                    withCredentials:true
-                });
-                const data = await res.data;
-                console.log(data);
-                const review = data.newReviewAndRating[0].review;
-                const rating = data.newReviewAndRating[0].rating;
-                console.log(review, " ", rating);
-                setFormData(prevData => ({
-                    ...prevData,
-                    rating: rating,
-                    review: review
-                }));
-            } catch (err) {
-                console.log(err);
-            }
-        };
-        getReview();
-    }, []);
-
-    const handleStarClick = (selectedRating) => {
-        setFormData(prevData => ({
-            ...prevData,
-            rating: selectedRating,
-        }));
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        try {
-            console.log('Form data:', formData);
-            await axios.post(buri+`/rateus/updateReview/${currentUser._id}`, formData, { withCredentials: true });
-            setFormData(prevData => ({
-                ...prevData,
-                rating: 0,
-                review: ""
-            }));
-            navigate("/");
-        } catch (error) {
-            console.log(error);
+  useEffect(() => {
+    const getReview = async () => {
+      try {
+        const res = await axios.get(`${buri}/rateus/ReviewOfCurrentUser/${currentUser._id}`, {
+          withCredentials: true,
+        });
+        const data = await res.data;
+        const existingReview = data?.newReviewAndRating?.[0];
+        if (existingReview) {
+          setFormData({
+            rating: existingReview.rating,
+            review: existingReview.review,
+          });
         }
+      } catch (err) {
+        console.log(err);
+      }
     };
 
-    return (
-        <div className='flex justify-center  mt-10 w-full text-gray-700 h-screen'>
-            <div className=''>
-                <p className='font-bold text-lg m-4'>Rate us:
-                    <div className='flex flex-row gap-3'>
-                        {[...Array(5)].map((_, index) => (
-                            <label key={index}>
-                                <input
-                                    className='hidden'
-                                    type='radio'
-                                    value={index + 1}
-                                    name="rating"
-                                    checked={formData.rating === index + 1}
-                                    onChange={() => handleStarClick(index + 1)}
-                                />
-                                <FaStar
-                                    color={formData.rating >= index + 1 ? '#FFD700' : 'gray'}
-                                    key={index}
-                                    className='h-[30px] w-[30px] sm:h-[50px] sm:w-[50px]'
-                                />
-                            </label>
-                        ))}
-                    </div>
-                </p>
-                <p className='font-bold text-2xl m-4'>Review Form :</p>
-                <form onSubmit={handleSubmit}>
-                    <textarea
-                        name="review"
-                        value={formData.review}
-                        className='w-11/12 px-4 py-2 mx-auto rounded-md border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200'
-                        cols="60"
-                        rows="5" // Adjusted number of rows to decrease the height
-                        placeholder='  Enter Your Review Please..'
-                        onChange={(e) => setFormData(prevData => ({ ...prevData, review: e.target.value }))}
-                        style={{ margin: "1rem" }}
-                    />
-                    
-                    <button className='bg-slate-700 ml-4 text-white mx-auto sm:text-2xl text-lg font-semibold rounded-lg p-2 sm:p-5 uppercase hover:opacity-95 disabled:opacity-80'>
-                        {(formData.review === "" || formData.rating === 0) ? 'Rate Us' : 'Update'}
-                    </button>
+    getReview();
+  }, [buri, currentUser._id]);
 
-                </form>
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post(`${buri}/rateus/updateReview/${currentUser._id}`, formData, {
+        withCredentials: true,
+      });
+      setFormData({ rating: 0, review: '' });
+      navigate('/');
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  return (
+    <div className='page-shell'>
+      <div className='glass-panel-strong mx-auto max-w-3xl p-6 sm:p-8'>
+        <span className='eyebrow'>Share your feedback</span>
+        <h1 className='section-heading mt-5'>How does the new FindYourHome experience feel?</h1>
+        <p className='section-copy mt-3 max-w-2xl'>
+          Your review helps shape the product. Tell us what feels great and what should keep improving.
+        </p>
+
+        <form onSubmit={handleSubmit} className='mt-8 space-y-6'>
+          <div className='glass-panel p-5'>
+            <p className='field-label !mb-4'>Rating</p>
+            <div className='flex flex-wrap gap-3'>
+              {[...Array(5)].map((_, index) => (
+                <button
+                  key={index}
+                  type='button'
+                  onClick={() => setFormData((prev) => ({ ...prev, rating: index + 1 }))}
+                  className='rounded-full border border-[color:var(--line)] bg-white/70 p-3 transition hover:-translate-y-0.5'
+                >
+                  <FaStar
+                    color={formData.rating >= index + 1 ? '#c88f52' : '#b9b3a8'}
+                    className='h-7 w-7 sm:h-9 sm:w-9'
+                  />
+                </button>
+              ))}
             </div>
-        </div>
-    );
+          </div>
+
+          <div>
+            <label htmlFor='review' className='field-label'>
+              Review
+            </label>
+            <textarea
+              id='review'
+              name='review'
+              value={formData.review}
+              className='field-shell min-h-[180px] resize-none'
+              placeholder='Share your thoughts on the browsing flow, visuals, and overall experience.'
+              onChange={(e) => setFormData((prev) => ({ ...prev, review: e.target.value }))}
+            />
+          </div>
+
+          <button className='btn-primary w-full !rounded-[22px] !py-4 uppercase'>
+            {formData.review === '' || formData.rating === 0 ? 'Rate Us' : 'Update Review'}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
 };
 
 export default ReviewPage;

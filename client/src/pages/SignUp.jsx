@@ -1,101 +1,139 @@
-import React from 'react'
-import { Link } from 'react-router-dom';
-import { useState } from 'react';
-import axios from 'axios'
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import OAuth from '../components/OAuth';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
+import { signUpFailure, signUpStart, signUpSuccess } from '../redux/user/userSlice';
 
-import { signUpStart, signUpSuccess, signUpFailure } from "../redux/user/userSlice"
 const SignUp = () => {
-
-  const [formdata, setformdata] = useState({
+  const [formdata, setFormdata] = useState({
     username: '',
     email: '',
     password: '',
   });
-
-   const buri=import.meta.env.VITE_BACKEND_URI
- 
+  const buri = import.meta.env.VITE_BACKEND_URI;
   const [errorr, setError] = useState(null);
   const [loadingg, setLoading] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { loading, error } = useSelector((state) => state.user);
+
   const handleChange = (e) => {
-    setformdata(
-      {
-        ...formdata,
-        [e.target.id]: e.target.value
-      }
-    )
-  }
-    const handleSubmit = async (e) => {
+    setFormdata({
+      ...formdata,
+      [e.target.id]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-  
+
     try {
       dispatch(signUpStart());
-      const res = await axios.post(buri+'/auth/signup', formdata, {
+      const res = await axios.post(`${buri}/auth/signup`, formdata, {
         headers: {
           'Content-Type': 'application/json',
         },
-        withCredentials: true
+        withCredentials: true,
       });
-  
-      const data = await res.data; 
-  
+
+      const data = await res.data;
+
       if (data.success === false) {
         setLoading(false);
         dispatch(signUpFailure(data.message));
         setError(data.message);
         return;
       }
-  
+
       setLoading(false);
-      setError(null)
+      setError(null);
       dispatch(signUpSuccess(data));
-      // navigate('/sign-in')
-      navigate('/')
-      // console.log(data);
-    } catch (error) {
+      navigate('/');
+    } catch (submitError) {
       setLoading(false);
-      dispatch(signUpFailure());
-     
-      setError(error.message); 
-      console.error('Error:', error.message);
+      dispatch(signUpFailure(submitError.message));
+      setError(submitError.message);
     }
   };
-    
-  return (
-    <div className='p-5 max-w-2xl mx-auto'>
 
-     <h1 className='text-2xl sm:text-4xl text-slate-700 text-center font-semibold my-7 '>
-        Sign Up
-      </h1>
-      <form onSubmit={handleSubmit} className='flex flex-col gap-4 '>
-        <input type="text" placeholder='username' value={formdata.username} className='sm:text-xl font-semibold border p-3 rounded-lg ' id='username' onChange={handleChange} >
-        </input>
-        <input type="text" placeholder='email' value={formdata.email} className='sm:text-xl font-semibold border p-3 rounded-lg ' id='email' onChange={handleChange} >
-        </input>
-        <input type="password" placeholder='password' value={formdata.password} className='sm:text-xl font-semibold border p-3 rounded-lg ' id='password' onChange={handleChange} >
-        </input>
-        <button disabled={loadingg} className='bg-slate-700 text-white p-3 sm:text-xl py-3  rounded-lg uppercase hover:opacity-95 disabled:opacity-80 transition-all  duration-200' >
-          {loadingg ? 'Loading...' : 'Sign up'}
-        </button>
-        <OAuth/>
-      </form>
-      <div className='flex gap-3 mt-5 sm:text-xl font-semibold'>
-        <p>Have an account? </p>
-        <Link to={'/sign-in'}>
-          <span className='text-blue-700 '>
-            Sign in
-          </span>
-        </Link>
+  return (
+    <div className='page-shell'>
+      <div className='glass-panel-strong hero-mesh relative overflow-hidden p-4 sm:p-6 lg:p-8'>
+        <div className='grid gap-6 lg:grid-cols-[1.05fr_0.95fr]'>
+          <div className='glass-panel order-2 p-6 sm:p-8 lg:order-1'>
+            <h1 className='section-heading !text-3xl'>Create your account</h1>
+            <p className='section-copy mt-2'>
+              Join to save homes, list properties, and manage your real estate profile.
+            </p>
+            <form onSubmit={handleSubmit} className='mt-8 flex flex-col gap-4'>
+              <div>
+                <label htmlFor='username' className='field-label'>
+                  Username
+                </label>
+                <input
+                  type='text'
+                  placeholder='Your name'
+                  value={formdata.username}
+                  className='field-shell'
+                  id='username'
+                  onChange={handleChange}
+                />
+              </div>
+              <div>
+                <label htmlFor='email' className='field-label'>
+                  Email
+                </label>
+                <input
+                  type='text'
+                  placeholder='you@example.com'
+                  value={formdata.email}
+                  className='field-shell'
+                  id='email'
+                  onChange={handleChange}
+                />
+              </div>
+              <div>
+                <label htmlFor='password' className='field-label'>
+                  Password
+                </label>
+                <input
+                  type='password'
+                  placeholder='Create a secure password'
+                  value={formdata.password}
+                  className='field-shell'
+                  id='password'
+                  onChange={handleChange}
+                />
+              </div>
+              <button disabled={loadingg} className='btn-primary mt-2 w-full !rounded-[22px] !py-4 uppercase'>
+                {loadingg ? 'Loading...' : 'Sign Up'}
+              </button>
+              <OAuth />
+            </form>
+            <div className='mt-6 text-sm font-semibold text-[color:var(--muted)] sm:text-base'>
+              Have an account?{' '}
+              <Link to='/sign-in' className='text-[color:var(--accent)]'>
+                Sign In
+              </Link>
+            </div>
+            {errorr && <p className='mt-5 text-sm font-semibold text-[#9f3f36] sm:text-base'>{errorr}</p>}
+          </div>
+
+          <div className='order-1 rounded-[28px] bg-[linear-gradient(160deg,_#efe1cb,_#d8e5db)] p-8 text-[color:var(--text)] lg:order-2'>
+            <span className='eyebrow !bg-white/60'>A more elevated start</span>
+            <h2 className='mt-6 font-[Fraunces] text-4xl leading-tight sm:text-5xl'>
+              Begin your next home journey with a polished workspace.
+            </h2>
+            <p className='mt-5 max-w-lg text-sm leading-7 text-[color:var(--muted)] sm:text-base'>
+              Whether you&apos;re buying, renting, or posting a new listing, your account is the
+              control center for everything that matters.
+            </p>
+          </div>
+        </div>
       </div>
-      {errorr && <p className='text-red-500 mt-5 font-semibold text-xl'>{errorr}</p>}
     </div>
-  )
-}
+  );
+};
 
 export default SignUp;

@@ -1,90 +1,83 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import ListingItem from "../components/ListingItem";
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { useLocation, useNavigate } from 'react-router-dom';
+import ListingItem from '../components/ListingItem';
+
 const Search = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [sideBardata, setSideBarData] = useState({
-    searchTerm: "",
-    type: "all",
+    searchTerm: '',
+    type: 'all',
     parking: false,
     furnished: false,
     offer: false,
-    sort: "created_at",
-    order: "desc",
+    sort: 'created_at',
+    order: 'desc',
   });
   const [loading, setLoading] = useState(false);
   const [listings, setListings] = useState([]);
   const buri = import.meta.env.VITE_BACKEND_URI;
-  const [llmSearch, useLlmSearch] = useState(false);
-  const [llmText, setLlmText] = useState("");
+  const [llmSearch, setLlmSearch] = useState(false);
+  const [llmText, setLlmText] = useState('');
   const [showMore, setShowMore] = useState(false);
-  // console.log("listings are : ", listings);
-  // console.log(sideBardata)
+
   const handleChange = (e) => {
-    if (
-      e.target.id === "all" ||
-      e.target.id === "rent" ||
-      e.target.id === "sale"
-    ) {
+    if (e.target.id === 'all' || e.target.id === 'rent' || e.target.id === 'sale') {
       setSideBarData({ ...sideBardata, type: e.target.id });
     }
-    if (e.target.id === "searchTerm") {
+    if (e.target.id === 'searchTerm') {
       setSideBarData({ ...sideBardata, searchTerm: e.target.value });
     }
-    if (
-      e.target.id === "parking" ||
-      e.target.id === "furnished" ||
-      e.target.id === "offer"
-    ) {
+    if (e.target.id === 'parking' || e.target.id === 'furnished' || e.target.id === 'offer') {
       setSideBarData({
         ...sideBardata,
-        [e.target.id]:
-          e.target.checked || e.target.checked === "true" ? true : false,
+        [e.target.id]: e.target.checked || e.target.checked === 'true',
       });
     }
-    if (e.target.id === "sort_order") {
-      const sort = e.target.value.split("_")[0] || "created_at";
-      const order = e.target.value.split("_")[1] || "desc";
+    if (e.target.id === 'sort_order') {
+      const sort = e.target.value.split('_')[0] || 'created_at';
+      const order = e.target.value.split('_')[1] || 'desc';
       setSideBarData({ ...sideBardata, sort, order });
     }
-    // console.log(sideBardata)
   };
+
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
-    const searchTermFromUrl = urlParams.get("searchTerm");
-    const typeFromUrl = urlParams.get("type");
-    const parkingFormUrl = urlParams.get("parking");
-    const furnishedFromUrl = urlParams.get("furnished");
-    const offerFromUrl = urlParams.get("offer");
-    const sortFromUrl = urlParams.get("sort");
-    const orderFromUrl = urlParams.get("order");
+    const searchTermFromUrl = urlParams.get('searchTerm');
+    const typeFromUrl = urlParams.get('type');
+    const parkingFromUrl = urlParams.get('parking');
+    const furnishedFromUrl = urlParams.get('furnished');
+    const offerFromUrl = urlParams.get('offer');
+    const sortFromUrl = urlParams.get('sort');
+    const orderFromUrl = urlParams.get('order');
 
     if (
       searchTermFromUrl ||
       typeFromUrl ||
-      parkingFormUrl ||
+      parkingFromUrl ||
       furnishedFromUrl ||
       offerFromUrl ||
       sortFromUrl ||
       orderFromUrl
     ) {
       setSideBarData({
-        searchTerm: searchTermFromUrl || "",
-        type: typeFromUrl || "all",
-        parking: parkingFormUrl === "true" ? true : false,
-        furnished: furnishedFromUrl === "true" ? true : false,
-        offer: offerFromUrl === "true" ? true : false,
-        sort: sortFromUrl || "created_at",
-        order: orderFromUrl || "desc",
+        searchTerm: searchTermFromUrl || '',
+        type: typeFromUrl || 'all',
+        parking: parkingFromUrl === 'true',
+        furnished: furnishedFromUrl === 'true',
+        offer: offerFromUrl === 'true',
+        sort: sortFromUrl || 'created_at',
+        order: orderFromUrl || 'desc',
       });
     }
+
     const fetchListings = async () => {
       try {
         setLoading(true);
         setShowMore(false);
         const searchQuery = urlParams.toString();
-        const res = await axios.get(buri + `/listing/get?${searchQuery}`, {
+        const res = await axios.get(`${buri}/listing/get?${searchQuery}`, {
           withCredentials: true,
         });
         const data = await res.data;
@@ -92,29 +85,25 @@ const Search = () => {
           setLoading(false);
           return;
         }
-        if (data.length > 8) {
-          setShowMore(true);
-        } else setShowMore(false);
-
+        setShowMore(data.length > 8);
         setLoading(false);
-        console.log("data is ", data);
         setListings(data);
       } catch (err) {
         console.log(err);
         setLoading(false);
       }
     };
+
     fetchListings();
-  }, [location.search]);
+  }, [buri, location.search]);
 
   const onShowMoreClick = async () => {
-    const numberOfListings = listings.length;
-    const startIndex = numberOfListings;
+    const startIndex = listings.length;
     const urlParams = new URLSearchParams(location.search);
-    urlParams.set("startIndex", startIndex);
+    urlParams.set('startIndex', startIndex);
     const searchQuery = urlParams.toString();
 
-    const res = await axios.get(buri + `/listing/get?${searchQuery}`, {
+    const res = await axios.get(`${buri}/listing/get?${searchQuery}`, {
       withCredentials: true,
     });
     const data = await res.data;
@@ -123,224 +112,191 @@ const Search = () => {
     }
     setListings([...listings, ...data]);
   };
-  //   const handleSubmit = (e) => {
-  //     e.preventDefault();
-  //     const urlParams = new URLSearchParams();
-  //     urlParams.set("searchTerm", sideBardata.searchTerm);
-  //     urlParams.set("type", sideBardata.type);
-  //     urlParams.set("parking", sideBardata.parking);
-  //     urlParams.set("furnished", sideBardata.furnished);
-  //     urlParams.set("offer", sideBardata.offer);
-  //     urlParams.set("sort", sideBardata.sort);
-  //     urlParams.set("order", sideBardata.order);
-
-  //     const searchQuery = urlParams.toString();
-  //     navigate(`/search?${searchQuery}`);
-  //   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
+    setLoading(true);
+    setShowMore(false);
+    setLlmText('');
 
-  setLoading(true);
-  setShowMore(false);
-  setLlmText("");
+    try {
+      if (llmSearch) {
+        if (!sideBardata.searchTerm.trim()) {
+          setListings([]);
+          setLoading(false);
+          return;
+        }
 
-  try {
-    if (llmSearch) {
-      if (!sideBardata.searchTerm.trim()) {
-        setListings([]);
-        setLlmText("");
-        setLoading(false);
-        return;
+        const res = await axios.get(`${buri}/listing/search`, {
+          params: { query: sideBardata.searchTerm.trim() },
+          withCredentials: true,
+        });
+
+        const data = res.data;
+        setListings(data.listings || []);
+        setLlmText(data.text || '');
+      } else {
+        const urlParams = new URLSearchParams();
+        urlParams.set('searchTerm', sideBardata.searchTerm);
+        urlParams.set('type', sideBardata.type);
+        urlParams.set('parking', sideBardata.parking);
+        urlParams.set('furnished', sideBardata.furnished);
+        urlParams.set('offer', sideBardata.offer);
+        urlParams.set('sort', sideBardata.sort);
+        urlParams.set('order', sideBardata.order);
+        navigate(`/search?${urlParams.toString()}`);
       }
-
-      const res = await axios.get(`${buri}/listing/search`, {
-        params: { query: sideBardata.searchTerm.trim() },
-        withCredentials: true,
-      });
-
-      const data = res.data;
-      setListings(data.listings || []);
-      setLlmText(data.text || "");
-    } else {
-      setLlmText("");
-
-      const urlParams = new URLSearchParams();
-      urlParams.set("searchTerm", sideBardata.searchTerm);
-      urlParams.set("type", sideBardata.type);
-      urlParams.set("parking", sideBardata.parking);
-      urlParams.set("furnished", sideBardata.furnished);
-      urlParams.set("offer", sideBardata.offer);
-      urlParams.set("sort", sideBardata.sort);
-      urlParams.set("order", sideBardata.order);
-
-      const searchQuery = urlParams.toString();
-      navigate(`/search?${searchQuery}`);
+    } catch (err) {
+      console.error(err);
     }
-  } catch (err) {
-    console.error(err);
-  }
 
-  setLoading(false);
-};
+    setLoading(false);
+  };
+
+  const checkboxLabel = (id, label, checked) => (
+    <label className={`toggle-chip ${checked ? '!bg-[color:var(--accent)] !text-white' : ''}`} htmlFor={id}>
+      <input
+        checked={checked}
+        onChange={handleChange}
+        type='checkbox'
+        id={id}
+        className='h-4 w-4 accent-[color:var(--accent)]'
+      />
+      <span>{label}</span>
+    </label>
+  );
 
   return (
-    <div className="flex flex-col md:flex-row">
-      {/* left */}
-      <div className="p-7 border-b-2 md:border-r-2 md:min-h-screen">
-        <form onSubmit={handleSubmit} className="flex flex-col gap-8">
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="llmSearch"
-              checked={llmSearch}
-              onChange={(e) => {
-                const checked = e.target.checked;
-                useLlmSearch(checked);
-                if (!checked) setLlmText("");
-              }}
-              className="w-5"
-            />
-            <label htmlFor="llmSearch" className="font-semibold">
-              Use LLM Search
+    <div className='page-shell'>
+      <div className='grid gap-6 xl:grid-cols-[340px_1fr]'>
+        <aside className='glass-panel-strong h-fit p-6 xl:sticky xl:top-28'>
+          <span className='eyebrow'>Property search</span>
+          <h1 className='section-heading mt-5 !text-3xl'>Refine your next move</h1>
+          <p className='section-copy mt-3'>
+            Use classic filters or let the LLM-assisted search help summarize what matches.
+          </p>
+
+          <form onSubmit={handleSubmit} className='mt-8 flex flex-col gap-6'>
+            <label className='toggle-chip w-fit' htmlFor='llmSearch'>
+              <input
+                type='checkbox'
+                id='llmSearch'
+                checked={llmSearch}
+                onChange={(e) => {
+                  const checked = e.target.checked;
+                  setLlmSearch(checked);
+                  if (!checked) {
+                    setLlmText('');
+                  }
+                }}
+                className='h-4 w-4 accent-[color:var(--accent)]'
+              />
+              <span>Use LLM Search</span>
             </label>
+
+            <div>
+              <label htmlFor='searchTerm' className='field-label'>
+                Search term
+              </label>
+              <input
+                value={sideBardata.searchTerm}
+                onChange={handleChange}
+                type='text'
+                id='searchTerm'
+                name='searchTerm'
+                placeholder='Mumbai skyline apartment'
+                className='field-shell'
+              />
+            </div>
+
+            <div>
+              <p className='field-label'>Type</p>
+              <div className='flex flex-wrap gap-3'>
+                {checkboxLabel('all', 'Rent & Sell', sideBardata.type === 'all')}
+                {checkboxLabel('rent', 'Rent', sideBardata.type === 'rent')}
+                {checkboxLabel('sale', 'Sale', sideBardata.type === 'sale')}
+                {checkboxLabel('offer', 'Offer', sideBardata.offer)}
+              </div>
+            </div>
+
+            <div>
+              <p className='field-label'>Amenities</p>
+              <div className='flex flex-wrap gap-3'>
+                {checkboxLabel('parking', 'Parking', sideBardata.parking)}
+                {checkboxLabel('furnished', 'Furnished', sideBardata.furnished)}
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor='sort_order' className='field-label'>
+                Sort by
+              </label>
+              <select
+                onChange={handleChange}
+                value={`${sideBardata.sort}_${sideBardata.order}`}
+                id='sort_order'
+                className='field-shell'
+              >
+                <option value='regularPrice_desc'>Price high to low</option>
+                <option value='regularPrice_asc'>Price low to high</option>
+                <option value='createdAt_desc'>Latest</option>
+                <option value='createdAt_asc'>Oldest</option>
+              </select>
+            </div>
+
+            <button className='btn-primary w-full !rounded-[22px] !py-4 uppercase'>Search</button>
+          </form>
+        </aside>
+
+        <section className='space-y-5'>
+          {llmText && (
+            <div className='glass-panel border-l-4 border-l-[color:var(--sun)] p-5'>
+              <p className='field-label !mb-2 !tracking-[0.2em]'>LLM Summary</p>
+              <p className='text-sm leading-7 text-[color:var(--text)] sm:text-base'>{llmText}</p>
+            </div>
+          )}
+
+          <div className='glass-panel-strong p-6'>
+            <div className='flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between'>
+              <div>
+                <p className='text-sm font-semibold uppercase tracking-[0.24em] text-[color:var(--accent)]'>
+                  Listing results
+                </p>
+                <h2 className='section-heading mt-2 !text-3xl'>
+                  {loading ? 'Searching properties...' : `${listings.length} properties found`}
+                </h2>
+              </div>
+              {!loading && listings.length > 0 && (
+                <p className='text-sm text-[color:var(--muted)]'>
+                  Curated across premium rentals, sales, and active offers
+                </p>
+              )}
+            </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <label className=" whitespace-nowrap font-semibold ">
-              Search Term :
-            </label>
-            <input
-              value={sideBardata.searchTerm}
-              onChange={handleChange}
-              type="text"
-              id="searchTerm"
-              name="searchTerm"
-              placeholder="Search..."
-              className="w-full border rounded-lg p-3"
-            ></input>
+          <div className='flex flex-wrap gap-6'>
+            {!loading && listings.length === 0 && (
+              <div className='glass-panel w-full p-10 text-center text-base font-semibold text-[color:var(--muted)]'>
+                No listings found for the current search.
+              </div>
+            )}
+            {loading && (
+              <div className='glass-panel w-full p-10 text-center text-base font-semibold text-[color:var(--muted)]'>
+                Loading results...
+              </div>
+            )}
+            {!loading &&
+              listings.map((listing) => <ListingItem key={listing._id} listing={listing} />)}
           </div>
-          <div className="flex gap-2 flex-wrap items-center">
-            <label className="font-semibold">Type:</label>
-            <div className="flex gap-2">
-              <input
-                checked={sideBardata.type === "all"}
-                onChange={handleChange}
-                type="checkbox"
-                id="all"
-                className="w-5 "
-              />
-              <span>Rent & Sell</span>
-            </div>
-            <div className="flex gap-2">
-              <input
-                checked={sideBardata.type === "rent"}
-                onChange={handleChange}
-                type="checkbox"
-                id="rent"
-                className="w-5 "
-              />
-              <span>Rent </span>
-            </div>
-            <div className="flex gap-2">
-              <input
-                checked={sideBardata.type === "sale"}
-                onChange={handleChange}
-                type="checkbox"
-                id="sale"
-                className="w-5 "
-              />
-              <span> Sale</span>
-            </div>
-            <div className="flex gap-2">
-              <input
-                checked={sideBardata.offer === true}
-                onChange={handleChange}
-                type="checkbox"
-                id="offer"
-                className="w-5 "
-              />
-              <span>Offer</span>
-            </div>
-          </div>
-          <div className="flex gap-2 flex-wrap items-center">
-            <label className="font-semibold">Amenities:</label>
-            <div className="flex gap-2">
-              <input
-                onChange={handleChange}
-                checked={sideBardata.parking}
-                type="checkbox"
-                id="parking"
-                className="w-5 "
-              />
-              <span>Parking</span>
-            </div>
-            <div className="flex gap-2">
-              <input
-                onChange={handleChange}
-                checked={sideBardata.furnished}
-                type="checkbox"
-                id="furnished"
-                className="w-5 "
-              />
-              <span>furnished</span>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 ">
-            <label className="font-semibold">Sort:</label>
-            <select
-              onChange={handleChange}
-              defaultValue={"created_at_desc"}
-              id="sort_order"
-              className="border rounded-lg p-3 "
-            >
-              <option value="regularPrice_desc">Price high to low</option>
-              <option value="regularPrice_asc">Price low to high</option>
-              <option value="createdAt_desc">Latest</option>
-              <option value="createdAt_asc">Oldest</option>
-            </select>
-          </div>
-          <button className="bg-slate-800 text-white p-3 rounded-lg uppercase hover:opacity-95 ">
-            Search
-          </button>
-        </form>
-      </div>
-      {/* right */}
-      <div className="flex-1">
-        {llmText && (
-          <div className="p-3 mb-4 bg-yellow-100 border-l-4 border-yellow-500 text-slate-900 rounded">
-            <p className="font-semibold">LLM Summary:</p>
-            <p>{llmText}</p>
-          </div>
-        )}
-        <h1 className="text-3xl font-semibold border-b p-3 mt-5 text-slate-700 ">
-          Listing Results:
-        </h1>
-        <div className="p-7 flex flex-wrap gap-4 ">
-          {!loading && listings.length === 0 && (
-            <p className="text-xl  p-3 font-semibold   text-slate-900 ">
-              No Listing found!
-            </p>
-          )}
-          {loading && (
-            <p className="text-xl text-slate-700 text-center w-full">
-              Loading...
-            </p>
-          )}
-          {loading === false &&
-            listings &&
-            listings.map((listing) => (
-              <ListingItem key={listing._id} listing={listing} />
-            ))}
+
           {showMore && (
-            <button
-              className="text-xl text-green-800 hover:underline p-7 text-center w-full "
-              onClick={onShowMoreClick}
-            >
-              Show More
-            </button>
+            <div className='flex justify-center'>
+              <button className='btn-secondary' onClick={onShowMoreClick}>
+                Show More
+              </button>
+            </div>
           )}
-        </div>
+        </section>
       </div>
     </div>
   );
