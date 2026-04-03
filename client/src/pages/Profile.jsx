@@ -29,6 +29,8 @@ export default function Profile() {
   const [updateSuccess, setUpdateSuccess] = useState(false);
   const [showListingError, setShowListingError] = useState(false);
   const [userListings, setUserListings] = useState([]);
+  const [listingsLoaded, setListingsLoaded] = useState(false);
+  const [listingsLoading, setListingsLoading] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const buri = import.meta.env.VITE_BACKEND_URI;
@@ -134,6 +136,7 @@ export default function Profile() {
   const handleShowListings = async () => {
     try {
       setShowListingError(false);
+      setListingsLoading(true);
       const res = await fetch(`${buri}/user/listings/${currentUser._id}`, {
         method: 'GET',
         credentials: 'include',
@@ -145,11 +148,15 @@ export default function Profile() {
       const data = await res.json();
       if (data.success === false) {
         setShowListingError(true);
+        setListingsLoading(false);
         return;
       }
       setUserListings(data);
+      setListingsLoaded(true);
+      setListingsLoading(false);
     } catch (err) {
       setShowListingError(true);
+      setListingsLoading(false);
     }
   };
 
@@ -286,19 +293,33 @@ export default function Profile() {
               <p className='text-sm font-semibold uppercase tracking-[0.24em] text-[color:var(--accent)]'>
                 Listing management
               </p>
-              <h2 className='section-heading mt-2 !text-3xl'>Your published spaces</h2>
+              <h2 className='section-heading mt-2 !text-3xl'>Your Listings</h2>
             </div>
-            <span className='text-sm text-[color:var(--muted)]'>{userListings.length} listings</span>
+            <span className='text-sm text-[color:var(--muted)]'>
+              {listingsLoaded ? `${userListings.length} listings` : 'Waiting to load'}
+            </span>
           </div>
 
           <div className='mt-6 space-y-4'>
-            {userListings.length === 0 && (
+            {!listingsLoaded && !listingsLoading && (
               <div className='glass-panel p-8 text-center text-sm font-semibold text-[color:var(--muted)]'>
-                No listings loaded yet. Use "Show Listings" to fetch your properties.
+                Click "Show Listings" to load the properties you created.
               </div>
             )}
 
-            {userListings.map((listing) => (
+            {listingsLoading && (
+              <div className='glass-panel p-8 text-center text-sm font-semibold text-[color:var(--muted)]'>
+                Loading your listings...
+              </div>
+            )}
+
+            {listingsLoaded && !listingsLoading && userListings.length === 0 && (
+              <div className='glass-panel p-8 text-center text-sm font-semibold text-[color:var(--muted)]'>
+                You do not have any listings yet.
+              </div>
+            )}
+
+            {listingsLoaded && userListings.map((listing) => (
               <div
                 key={listing._id}
                 className='glass-panel flex flex-col gap-4 p-4 sm:flex-row sm:items-center'
